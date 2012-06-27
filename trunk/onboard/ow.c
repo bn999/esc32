@@ -221,6 +221,15 @@ void owReadComplete(void) {
 	    owWriteBytes(1);
 	break;
 
+	case OW_GET_MODE:
+	    owBuf[0] = OW_GET_MODE;
+	    owBuf[1] = runMode;
+	    
+	    owState = OW_WRITE;
+	    owBufPointer = owBuf;
+	    owWriteBytes(2);
+	break;
+	
 	case OW_SET_MODE:
 	    if (owLastCommand != owBuf[0]) {
 		owLastCommand = owBuf[0];
@@ -230,7 +239,7 @@ void owReadComplete(void) {
 	    }
 	    else {
 		owLastCommand = 0x00;
-		if (owBuf[1] < NUM_RUN_MODES) {
+		if (owBuf[1] >= 0 && owBuf[1] < NUM_RUN_MODES) {
 		    runMode = owBuf[1];
 
 		    owState = OW_WRITE;

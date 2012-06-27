@@ -43,9 +43,8 @@ int16_t histSize;
 uint16_t histA[ADC_HIST_SIZE];
 uint16_t histB[ADC_HIST_SIZE];
 uint16_t histC[ADC_HIST_SIZE];
-uint16_t histCOMP[ADC_HIST_SIZE];
 
-uint32_t avgA, avgB, avgC, avgCOMP;
+uint32_t avgA, avgB, avgC;
 int32_t adcAmpsOffset;
 volatile int32_t adcAvgAmps;
 volatile int32_t adcMaxAmps;
@@ -204,13 +203,11 @@ void adcGrowHist(void) {
     avgA += histA[histIndex];
     avgB += histB[histIndex];
     avgC += histC[histIndex];
-    avgCOMP += histCOMP[histIndex];
 
     for (i = histSize; i > histIndex; i--) {
 	histA[i] = histA[i-1];
 	histB[i] = histB[i-1];
 	histC[i] = histC[i-1];
-	histCOMP[i] = histCOMP[i-1];
     }
 
     histSize++;
@@ -223,7 +220,6 @@ void adcShrinkHist(void) {
 	histA[i] = histA[i+1];
 	histB[i] = histB[i+1];
 	histC[i] = histC[i+1];
-	histCOMP[i] = histCOMP[i+1];
     }
 
     histSize--;
@@ -234,7 +230,6 @@ void adcShrinkHist(void) {
     avgA -= histA[histIndex];
     avgB -= histB[histIndex];
     avgC -= histC[histIndex];
-    avgCOMP -= histCOMP[histIndex];
 }
 
 void adcEvaluateHistSize(void) {
@@ -294,15 +289,13 @@ void DMA1_Channel1_IRQHandler(void) {
 	histB[histIndex] = valB = raw[2];
 	histC[histIndex] = valC = raw[3];
 #endif
-	histCOMP[histIndex] = valCOMP = (valA + valB + valC)/3;
 	histIndex = (histIndex + 1) % histSize;
 
 	avgA += valA - histA[histIndex];
 	avgB += valB - histB[histIndex];
 	avgC += valC - histC[histIndex];
-	avgCOMP += valCOMP - histCOMP[histIndex];
 
-	if (avgCOMP/histSize > ADC_MIN_COMP && state != ESC_STATE_DISARMED) {
+	if ((avgA+avgB+avgC)/histSize > (ADC_MIN_COMP*3) && state != ESC_STATE_DISARMED) {
 	    register int32_t periodMicros;
 
 	    periodMicros = (currentMicros >= detectedCrossing) ? (currentMicros - detectedCrossing) : (TIMER_MASK - detectedCrossing + currentMicros);
@@ -310,27 +303,27 @@ void DMA1_Channel1_IRQHandler(void) {
 	    if (periodMicros > nextCrossingDetect) {
 		register uint8_t nextStep = 0;
 
-		if (!adcStateA && avgA >= avgCOMP) {
+		if (!adcStateA && avgA >= (avgB+avgC)>>1) {
 		    adcStateA = 1;
 		    nextStep = 6;
 		}
-		else if (adcStateA && avgA <= avgCOMP) {
+		else if (adcStateA && avgA <= (avgB+avgC)>>1) {
 		    adcStateA = 0;
 		    nextStep = 3;
 		}
-		else if (!adcStateB && avgB >= avgCOMP) {
+		else if (!adcStateB && avgB >= (avgA+avgC)>>1) {
 		    adcStateB = 1;
 		    nextStep = 4;
 		}
-		else if (adcStateB && avgB <= avgCOMP) {
+		else if (adcStateB && avgB <= (avgA+avgC)>>1) {
 		    adcStateB = 0;
 		    nextStep = 1;
 		}
-		else if (!adcStateC && avgC >= avgCOMP) {
+		else if (!adcStateC && avgC >= (avgA+avgB)>>1) {
 		    adcStateC = 1;
 		    nextStep = 2;
 		}
-		else if (adcStateC && avgC <= avgCOMP) {
+		else if (adcStateC && avgC <= (avgA+avgB)>>1) {
 		    adcStateC = 0;
 		    nextStep = 5;
 		}
@@ -371,58 +364,6 @@ void DMA1_Channel1_IRQHandler(void) {
 	    }
 	}
     }
-
-/*
-    if (0 && ampsFlag) {
-	int32_t iTerm, pTerm;
-	int32_t currentLimit;
-	int32_t newDutyCycle;
-	int32_t error = (adcAvgAmps - adcAmpsOffset) - fetMaxCurrent;
-
-	currentI += error;
-	if (currentI < 0)
-	    currentI = 0;
-	iTerm = currentI>>18;//18;
-
-	pTerm = error>>11;//11;
-	if (pTerm > (fetActualDutyCycle>>1))
-	    pTerm = (fetActualDutyCycle>>1);
-	else if (pTerm < 0)
-	    pTerm = 0;
-
-	currentLimit = (pTerm + iTerm);
-
-	if (currentLimit < 0)
-	    currentLimit = 0;
-	else if (currentLimit > fetActualDutyCycle)
-	    currentLimit = fetActualDutyCycle;
-
-	newDutyCycle = fetActualDutyCycle - currentLimit;
-
-	// if actual duty too high
-	if (newDutyCycle > fetDutyCycle) {
-	    // slowly reduce actual duty
-	    if (numLoops > (crossingPeriod / fetDutyIncreaseFactor))
-		fetActualDutyCycle--;
-	    _fetSetDutyCycle(fetDutyCycle);
-	    // reset counter
-	    numLoops = 0;
-	}
-	// if actual duty too low
-	else if (fetActualDutyCycle < fetDutyCycle && numLoops > (crossingPeriod / fetDutyIncreaseFactor)) {
-	    // slowly increase actual duty
-	    fetActualDutyCycle++;
-	    _fetSetDutyCycle(newDutyCycle);
-	    // reset counter
-	    numLoops = 0;
-	}
-	else {
-	    _fetSetDutyCycle(newDutyCycle);
-	}
-
-	numLoops++;
-    }
-*/
 }
 
 // start injected conversion of current sensor

@@ -34,6 +34,7 @@
 #define OW_CONFIG_WRITE	    0x07
 #define OW_CONFIG_DEFAULT   0x08
 #define OW_SET_MODE	    0x09
+#define OW_GET_MODE	    0x0A
 
 #define OW_UID_ADDRESS	    0x1FFFF7E8
 

@@ -50,7 +50,7 @@ extern float targetRpm;
 extern float runRPMFactor;
 extern uint8_t disarmReason;
 extern uint8_t commandMode;
-extern uint8_t runMode;
+volatile extern uint8_t runMode;
 
 extern void runInit(void);
 extern void runNewInput(uint16_t setpoint);

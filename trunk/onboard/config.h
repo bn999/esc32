@@ -19,11 +19,11 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-#define DEFAULT_CONFIG_VERSION		1.48f
+#define DEFAULT_CONFIG_VERSION		1.481f
 #define DEFAULT_STARTUP_MODE		0.0f
 #define DEFAULT_BAUD_RATE		230400
 
-#define DEFAULT_PTERM			0.5f
+#define DEFAULT_PTERM			0.25f
 #define DEFAULT_ITERM			0.0006f
 
 #define DEFAULT_FF1TERM			0.0f
@@ -31,15 +31,15 @@
 
 #define DEFAULT_CL1TERM			0.0f
 #define DEFAULT_CL2TERM			0.0f
-#define DEFAULT_CL3TERM			 0.0f
-#define DEFAULT_CL4TERM			 0.0f
-#define DEFAULT_CL5TERM		      0.0f
+#define DEFAULT_CL3TERM			0.0f
+#define DEFAULT_CL4TERM			0.0f
+#define DEFAULT_CL5TERM			0.0f
 
 #define DEFAULT_SHUNT_RESISTANCE	0.5f	    // milli Ohms
 #define DEFAULT_MIN_PERIOD		50.0f	    // us
 #define DEFAULT_MAX_PERIOD		12000.0f    // us
 #define DEFAULT_BLANKING_MICROS		30.0f	    // us
-#define DEFAULT_ADVANCE			15.0f	    // electrical degrees
+#define DEFAULT_ADVANCE			10.0f	    // electrical degrees
 #define DEFAULT_START_VOLTAGE		1.1f	    // voltage used to start motor
 #define DEFAULT_GOOD_DETECTS_START	75.0f	    // after which will go into RUNNING mode
 #define DEFAULT_BAD_DETECTS_DISARM	48.0f	    // after which will go into DISARMED mode

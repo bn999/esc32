@@ -112,6 +112,8 @@ const char *configFormatStrings[] = {
 
 // AXi 2212/34, APC 10x4.7
 //#define DEFAULT_MAX_CURRENT		15.0
+//#define DEFAULT_PTERM			0.25
+//#define DEFAULT_PWM_RPM_SCALE		6500
 //#define DEFAULT_FF1TERM              +7.23870e-08
 //#define DEFAULT_FF2TERM              +1.40690e-03
 //#define DEFAULT_CL1TERM              -3.05210e-01
@@ -151,6 +153,39 @@ const char *configFormatStrings[] = {
 //#define DEFAULT_CL3TERM		+8.779305e-02
 //#define DEFAULT_CL4TERM		-4.019083e-05
 //#define DEFAULT_CL5TERM		+8.509188e-01
+
+// Avroto 2814/11s, APC 14x4.7SF
+//#define DEFAULT_FF1TERM		+1.998525e-07
+//#define DEFAULT_FF2TERM		+9.514660e-04
+//#define DEFAULT_MAX_CURRENT		20.0
+//#define DEFAULT_PWM_RPM_SCALE		5500
+//#define DEFAULT_CL1TERM		-2.301245e-02
+//#define DEFAULT_CL2TERM		+1.381919e-03
+//#define DEFAULT_CL3TERM		+2.570513e-01
+//#define DEFAULT_CL4TERM		-1.064467e-04
+//#define DEFAULT_CL5TERM		+5.656897e-01
+
+// Avroto 2814/11s, APC 12x3.8SF
+//#define DEFAULT_FF1TERM		+1.028551e-07
+//#define DEFAULT_FF2TERM		+9.977381e-04
+//#define DEFAULT_MAX_CURRENT		20.0
+//#define DEFAULT_PWM_RPM_SCALE		7500
+//#define DEFAULT_CL1TERM		-8.272934e-01
+//#define DEFAULT_CL2TERM		+1.385665e-03
+//#define DEFAULT_CL3TERM		+1.335600e-01
+//#define DEFAULT_CL4TERM		-9.868111e-05
+//#define DEFAULT_CL5TERM		+1.173475e+00
+
+// Avroto 2814/11s, APC 11x4.7SF
+//#define DEFAULT_FF1TERM		+7.562404e-08
+//#define DEFAULT_FF2TERM		+1.116254e-03
+//#define DEFAULT_MAX_CURRENT		20.0
+//#define DEFAULT_PWM_RPM_SCALE		8125
+//#define DEFAULT_CL1TERM		-7.778534e-01
+//#define DEFAULT_CL2TERM		+1.385586e-03
+//#define DEFAULT_CL3TERM		+1.559464e-01
+//#define DEFAULT_CL4TERM		-9.598113e-05
+//#define DEFAULT_CL5TERM		+1.091966e+00
 
 
 void configInit(void) {

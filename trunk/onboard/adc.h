@@ -81,7 +81,7 @@ extern volatile int32_t adcAvgAmps;
 extern volatile int32_t adcMaxAmps;
 extern volatile int32_t adcAvgVolts;
 extern int16_t histSize;
-extern uint32_t avgA, avgB, avgC, avgCOMP;
+extern uint32_t avgA, avgB, avgC;
 extern volatile uint32_t detectedCrossing;
 extern volatile uint32_t crossingPeriod;
 
