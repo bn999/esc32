@@ -414,7 +414,7 @@ void binaryCheck(void) {
 			break;
 
 		    case BINARY_VALUE_AVGCOMP:
-			binarySendFloat((float)avgCOMP);
+			binarySendFloat((float)(avgA+avgB+avgC)/3);
 			break;
 
 		    case BINARY_VALUE_FETSTEP:

@@ -44,8 +44,8 @@ float runRPMFactor;
 float maxCurrentSQRT;
 uint8_t disarmReason;
 uint8_t commandMode;
-uint8_t runMode;
 uint8_t runArmCount;
+volatile uint8_t runMode;
 
 void runFeedIWDG(void) {
 #ifdef RUN_ENABLE_IWDG
