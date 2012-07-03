@@ -36,6 +36,7 @@ extern void cliCheck(void);
 extern void cliFuncArm(void *cmd, char *cmdLine);
 extern void cliFuncBeep(void *cmd, char *cmdLine);
 extern void cliFuncBinary(void *cmd, char *cmdLine);
+extern void cliFuncBoot(void *cmd, char *cmdLine);
 extern void cliFuncConfig(void *cmd, char *cmdLine);
 extern void cliFuncDisarm(void *cmd, char *cmdLine);
 extern void cliFuncDuty(void *cmd, char *cmdLine);
