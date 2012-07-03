@@ -19,6 +19,9 @@
 #ifndef _RCC_H
 #define _RCC_H
 
+#define AIRCR_VECTKEY_MASK    ((uint32_t)0x05FA0000)
+
 extern void rccInit(void);
+extern void rccReset(void);
 
 #endif

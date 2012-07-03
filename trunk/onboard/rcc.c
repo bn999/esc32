@@ -18,10 +18,57 @@
 
 #include "rcc.h"
 #include "adc.h"
+#include "main.h"
+#include "digital.h"
 #include "stm32f10x_rcc.h"
+
+uint32_t rccReadBkpDr(void) {
+    return *((uint16_t *)BKP_BASE + 0x04) | *((uint16_t *)BKP_BASE + 0x08)<<16;
+}
+
+void rccWriteBkpDr(uint32_t value) {
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
+    PWR->CR |= PWR_CR_DBP;
+
+    *((uint16_t *)BKP_BASE + 0x04) = value & 0xffff;
+    *((uint16_t *)BKP_BASE + 0x08) = (value & 0xffff0000)>>16;
+}
+
+void rccBootLoader(void) {
+    // check for magic cookie
+    if (rccReadBkpDr() == 0xDECEA5ED) {
+	digitalPin *statusLed, *errorLed;
+
+	rccWriteBkpDr(0); // reset flag
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_AFIO, ENABLE);
+	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
+
+	statusLed = digitalInit(GPIO_STATUS_LED_PORT, GPIO_STATUS_LED_PIN);
+	digitalLo(statusLed);
+	errorLed = digitalInit(GPIO_ERROR_LED_PORT, GPIO_ERROR_LED_PIN);
+	digitalLo(errorLed);
+
+	// jump to boot loader ROM
+	__asm volatile ("LDR     R0, =0x1FFFF000\n"
+			"LDR     SP,[R0, #0]\n"
+			"LDR     R0,[R0, #4]\n"
+			"BX      R0\n");
+    }
+}
+
+void rccReset(void) {
+    // set magic cookie
+    rccWriteBkpDr(0xDECEA5ED);
+
+    // Generate system reset
+    SCB->AIRCR = AIRCR_VECTKEY_MASK | (uint32_t)0x04;
+}
 
 void rccInit(void) {
     GPIO_InitTypeDef GPIO_InitStructure;
+
+    rccBootLoader();
 
     // turn on fault interrupts
     SCB->SHCSR |= (0x01<<SCB_SHCSR_USGFAULTENA_Pos);
@@ -71,7 +118,7 @@ void rccInit(void) {
 
     // clear reset flags
     RCC_ClearFlag();
-    
+
     // Shutdown HSI clock
     RCC_HSICmd(DISABLE);
     while (RCC_GetFlagStatus(RCC_FLAG_HSIRDY) == SET)

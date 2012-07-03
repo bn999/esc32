@@ -25,6 +25,8 @@
 #include "adc.h"
 #include "pwm.h"
 #include "config.h"
+#include "rcc.h"
+#include "timer.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,6 +43,7 @@ const cliCommand_t cliCommandTable[] = {
     {"arm", "", cliFuncArm},
     {"beep", "<frequency> <duration>", cliFuncBeep},
     {"binary", "", cliFuncBinary},
+    {"bootloader", "", cliFuncBoot},
     {"config", "[READ | WRITE | DEFAULT]", cliFuncConfig},
     {"disarm", "", cliFuncDisarm},
     {"duty", "<percent>", cliFuncDuty},
@@ -143,6 +146,18 @@ void cliFuncBinary(void *cmd, char *cmdLine) {
 	serialPrint("Entering binary command mode...\r\n");
 	cliTelemetry = 0;
 	commandMode = BINARY_MODE;
+    }
+}
+
+void cliFuncBoot(void *cmd, char *cmdLine) {
+    if (state != ESC_STATE_DISARMED) {
+	serialPrint("ESC armed, disarm first\r\n");
+    }
+    else {
+	serialPrint("Rebooting in boot loader mode...\r\n");
+	timerDelay(0xffff);
+
+	rccReset();
     }
 }
 
