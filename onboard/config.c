@@ -187,6 +187,17 @@ const char *configFormatStrings[] = {
 //#define DEFAULT_CL4TERM		-9.598113e-05
 //#define DEFAULT_CL5TERM		+1.091966e+00
 
+// RCTimer 5010-14, RCTimer 15x5.5 CF
+//#define DEFAULT_FF1TERM		+1.663210e-07
+//#define DEFAULT_FF2TERM		+3.019136e-03
+//#define DEFAULT_MAX_CURRENT		10.0
+//#define DEFAULT_PWM_RPM_SCALE		4200
+//#define DEFAULT_CL1TERM		+4.023476e-01
+//#define DEFAULT_CL2TERM		+2.972955e-03
+//#define DEFAULT_CL3TERM		+3.942016e-01
+//#define DEFAULT_CL4TERM		-2.607788e-04
+//#define DEFAULT_CL5TERM		+1.195345e+00
+
 
 void configInit(void) {
     float ver;
