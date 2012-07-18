@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <math.h>
+#include <signal.h>
 
 //#define ESC32_DEBUG
 
@@ -225,7 +226,7 @@ unsigned short esc32SendCommand(unsigned char command, float param1, float param
 }
 
 void esc32Usage(void) {
-	fprintf(stderr, "usage: loader <-h> <-a amps> <-p device_file> <-b baud_rate> <-t telemtry_out_file> [--cl --r2v]\n");
+	fprintf(stderr, "usage: esc32Cal <-h> <-a amps> <-p device_file> <-b baud_rate> <-t telemtry_out_file> [--cl --r2v]\n");
 }
 
 unsigned int esc32Options(int argc, char **argv) {
@@ -584,6 +585,13 @@ void currentLimiter(void) {
 	currentLimitGraph(ab);
 }
 
+void signal_callback_handler(int signum) {
+	printf("Caught signal %d\n",signum);
+	esc32SendReliably(BINARY_COMMAND_DISARM, 0.0, 0.0, 0);
+	esc32SendCommand(BINARY_COMMAND_CLI, 0.0, 0.0, 0);
+	exit(signum);
+}
+
 int main(int argc, char **argv) {
 	float f;
 	int i;
@@ -622,6 +630,9 @@ int main(int argc, char **argv) {
 	esc32SendReliably(BINARY_COMMAND_TELEM_VALUE, 1.0, BINARY_VALUE_VOLTS_MOTOR, 2);
 	esc32SendReliably(BINARY_COMMAND_TELEM_VALUE, 2.0, BINARY_VALUE_AMPS, 2);
 	esc32SendReliably(BINARY_COMMAND_SET, MAX_CURRENT, 0.0, 2);
+
+	// disarm motor if interrupted
+	signal(SIGINT, signal_callback_handler);
 
 	if (runR2V)
 		rpmToVoltage();
