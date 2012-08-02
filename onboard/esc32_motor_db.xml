@@ -118,6 +118,30 @@
 		</motor>
 	</brand>
 	<brand name="Tiger Motor">
+		<motor model="MT2212">
+			<prop model="Genfan carbon enhanced 10x4.5">
+				<MAX_CURRENT>10.0</MAX_CURRENT>
+				<PWM_RPM_SCALE>6600</PWM_RPM_SCALE>
+				<FF1TERM>+7.758036e-08</FF1TERM>
+				<FF2TERM>+1.346518e-03</FF2TERM>
+				<CL1TERM>+1.185998e-01</CL1TERM>
+				<CL2TERM>+1.101180e-03</CL2TERM>
+				<CL3TERM>+1.036849e-02</CL3TERM>
+				<CL4TERM>-2.339198e-05</CL4TERM>
+				<CL5TERM>+1.565325e+00</CL5TERM>
+			</prop>
+			<prop model="Graupner eprop 11x5">
+				<MAX_CURRENT>10.0</MAX_CURRENT>
+				<PWM_RPM_SCALE>6600</PWM_RPM_SCALE>
+				<FF1TERM>+6.602521e-08</FF1TERM>
+				<FF2TERM>+1.307364e-03</FF2TERM>
+				<CL1TERM>+1.083585e-01</CL1TERM>
+				<CL2TERM>+1.118480e-03</CL2TERM>
+				<CL3TERM>+2.000165e-02</CL3TERM>
+				<CL4TERM>-1.675907e-05</CL4TERM>
+				<CL5TERM>+1.547213e+00</CL5TERM>
+			</prop>
+		</motor>
 		<motor model="MT3506">
 			<prop model="APC 11x4.7SF">
 				<MAX_CURRENT>10.0</MAX_CURRENT>
