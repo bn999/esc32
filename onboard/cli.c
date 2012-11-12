@@ -440,7 +440,7 @@ void cliFuncStatus(void *cmd, char *cmdLine) {
 }
 
 void cliFuncStop(void *cmd, char *cmdLine) {
-    if (state < ESC_STATE_STARTING) {
+    if (state < ESC_STATE_NOCOMM) {
 	serialPrint("ESC not running\r\n");
     }
     else {

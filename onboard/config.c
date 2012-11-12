@@ -50,6 +50,11 @@ const char *configParameterStrings[] = {
     "BLANKING_MICROS",
     "ADVANCE",
     "START_VOLTAGE",
+    "START_ALIGN_TIME",
+    "START_ALIGN_VOLTAGE",
+    "START_STEPS_NUM",
+    "START_STEPS_PERIOD",
+    "START_STEPS_ACCEL",
     "GOOD_DETECTS_START",
     "BAD_DETECTS_DISARM",
     "MAX_CURRENT",
@@ -63,6 +68,7 @@ const char *configParameterStrings[] = {
     "PWM_MAX_VALUE",
     "PWM_MIN_START",
     "PWM_RPM_SCALE",
+    "PWM_LOWPASS",
     "FET_BRAKING"
 };
 
@@ -87,6 +93,11 @@ const char *configFormatStrings[] = {
     "%.0f us",	    // BLANKING_MICROS
     "%.2f Degs",    // ADVANCE
     "%.2f Volts",   // START_VOLTAGE
+    "%.0f ms",  // START_ALIGN_TIME
+    "%.2f Volts",   // START_ALIGN_VOLTAGE
+    "%.0f",	    // START_STEPS_NUM
+    "%.0f us",  // START_STEPS_PERIOD
+    "%.0f us",	 // START_STEPS_ACCEL
     "%.0f",	    // GOOD_DETECTS_START
     "%.0f",	    // BAD_DETECTS_DISARM
     "%.1f Amps",    // MAX_CURRENT
@@ -100,6 +111,7 @@ const char *configFormatStrings[] = {
     "%.0f us",	    // PWM_MAX_VALUE
     "%.0f us",	    // PWM_MIN_START
     "%.0f RPM",	    // PWM_RPM_SCALE
+    "%2.2f",	    // PWM_LOWPASS
     "%.0f"	    // FET_BRAKING
 };
 
@@ -197,6 +209,11 @@ void configLoadDefault(void) {
     p[BLANKING_MICROS] = DEFAULT_BLANKING_MICROS;
     p[ADVANCE] = DEFAULT_ADVANCE;
     p[START_VOLTAGE] = DEFAULT_START_VOLTAGE;
+    p[START_ALIGN_TIME] = DEFAULT_START_ALIGN_TIME;
+    p[START_ALIGN_VOLTAGE] = DEFAULT_START_ALIGN_VOLTAGE;
+    p[START_STEPS_NUM] = DEFAULT_START_STEPS_NUM;
+    p[START_STEPS_PERIOD] = DEFAULT_START_STEPS_PERIOD;
+    p[START_STEPS_ACCEL] = DEFAULT_START_STEPS_ACCEL;
     p[GOOD_DETECTS_START] = DEFAULT_GOOD_DETECTS_START;
     p[BAD_DETECTS_DISARM] = DEFAULT_BAD_DETECTS_DISARM;
     p[MAX_CURRENT] = DEFAULT_MAX_CURRENT;
@@ -210,6 +227,7 @@ void configLoadDefault(void) {
     p[PWM_MAX_VALUE] = DEFAULT_PWM_MAX_VALUE;
     p[PWM_MIN_START] = DEFAULT_PWM_MIN_START;
     p[PWM_RPM_SCALE] = DEFAULT_PWM_RPM_SCALE;
+    p[PWM_LOWPASS] = DEFAULT_PWM_LOWPASS;
     p[FET_BRAKING] = DEFAULT_FET_BRAKING;
 
     configRecalcConst();

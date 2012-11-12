@@ -19,7 +19,7 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-#define DEFAULT_CONFIG_VERSION		1.482f
+#define DEFAULT_CONFIG_VERSION		1.483f
 #define DEFAULT_STARTUP_MODE		0.0f
 #define DEFAULT_BAUD_RATE		230400
 
@@ -44,6 +44,11 @@
 #define DEFAULT_BLANKING_MICROS		30.0f	    // us
 #define DEFAULT_ADVANCE			10.0f	    // electrical degrees
 #define DEFAULT_START_VOLTAGE		1.1f	    // voltage used to start motor
+#define DEFAULT_START_ALIGN_TIME		600	    // ms to align rotor in known position
+#define DEFAULT_START_ALIGN_VOLTAGE 0.9f	    // max voltage during align (around 0.8 * START_VOLTAGE)
+#define DEFAULT_START_STEPS_NUM		0	       // steps without commutation
+#define DEFAULT_START_STEPS_PERIOD	16000     // us betweet steps
+#define DEFAULT_START_STEPS_ACCEL	0	       // us each following step will be shorter (acceleration)
 #define DEFAULT_GOOD_DETECTS_START	75.0f	    // after which will go into RUNNING mode
 #define DEFAULT_BAD_DETECTS_DISARM	48.0f	    // after which will go into DISARMED mode
 #define DEFAULT_MAX_CURRENT		20.0f	    // amps
@@ -59,6 +64,7 @@
 #define DEFAULT_PWM_MAX_VALUE		2250	    // maximum to consider pulse a valid signal
 #define DEFAULT_PWM_MIN_START		1100	    // minimum value required to start
 
+#define DEFAULT_PWM_LOWPASS  0.0f      // lowpass on PWM input values
 #define DEFAULT_PWM_RPM_SCALE		6500	    // RPM equivalent of maximum PWM IN in CLOSED_LOOP mode
 
 #define DEFAULT_FET_BRAKING		0
@@ -87,6 +93,11 @@ enum configParameters {
     BLANKING_MICROS,
     ADVANCE,
     START_VOLTAGE,
+    START_ALIGN_TIME,
+    START_ALIGN_VOLTAGE,
+    START_STEPS_NUM,
+    START_STEPS_PERIOD,
+    START_STEPS_ACCEL,
     GOOD_DETECTS_START,
     BAD_DETECTS_DISARM,
     MAX_CURRENT,
@@ -100,6 +111,7 @@ enum configParameters {
     PWM_MAX_VALUE,
     PWM_MIN_START,
     PWM_RPM_SCALE,
+    PWM_LOWPASS,
     FET_BRAKING,
     CONFIG_NUM_PARAMS
 };
