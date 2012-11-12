@@ -156,6 +156,38 @@ void runNewInput(uint16_t setpoint) {
 	    // limit to configured maximum
 	    targetRpm = (target > p[PWM_RPM_SCALE]) ? p[PWM_RPM_SCALE] : target;
 	}
+
+	// THRUST Mode
+	else if (runMode == CLOSED_LOOP_THRUST) {
+
+	    float maxThrust;     // thrust at PWM_RPM_SCALE (MAX_RPM)
+	    float targetThrust;  // desired trust
+	    float target;        // target(rpm)
+
+	    // Calculate MAX_THRUST from PWM_RPM_SCALE (which is MAX_RPM) and THRxTERMs
+	    // Based on "thrust = rpm * a1 + rpm^2 * a2"
+	    maxThrust = p[PWM_RPM_SCALE] * p[THR1TERM] + p[PWM_RPM_SCALE] * p[PWM_RPM_SCALE] * p[THR2TERM];
+
+	    // Calculate targetThrust based on input and MAX_THRUST
+	    targetThrust = maxThrust * (setpoint-pwmLoValue) / (pwmHiValue - pwmLoValue);
+
+	    // Workaraound: Negative targetThrust will screw up sqrtf() and create MAX_RPM on throttle min. Dangerous!
+	    if (targetThrust > 0.0f)
+	    {
+	    	// Calculate target(rpm) based on targetThrust
+	    	target = ((sqrtf(p[THR1TERM] * p[THR1TERM] + 4.0f * p[THR2TERM] * targetThrust) - p[THR1TERM] ) / ( 2.0f * p[THR2TERM] ));
+	    }
+	    // targetThrust is negative (pwm_in < pwmLoValue)
+	    else 
+	    {
+	    	// same behaviour like RPM mode.
+	    	target = p[PWM_RPM_SCALE] * (setpoint-pwmLoValue) / (pwmHiValue - pwmLoValue);
+	    }
+
+	    // upper limit for targetRpm is configured maximum PWM_RPM_SCALE (which is MAX_RPM)
+	    targetRpm = (target > p[PWM_RPM_SCALE]) ? p[PWM_RPM_SCALE] : target;
+	}
+
 	lastPwm = setpoint;
     }
     else if (state == ESC_STATE_STARTING && setpoint <= pwmLoValue) {
@@ -283,6 +315,13 @@ uint8_t runRpm(void) {
 	    fetSetDutyCycle(runRpmPID(rpm, targetRpm));
 	    return 1;
 	}
+
+	// run closed loop control also for THRUST mode
+	else if (runMode == CLOSED_LOOP_THRUST) {
+	    fetSetDutyCycle(runRpmPID(rpm, targetRpm));
+	    return 1;
+	}
+
 	else {
 	    return 0;
 	}
