@@ -19,7 +19,7 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-#define DEFAULT_CONFIG_VERSION		1.481f
+#define DEFAULT_CONFIG_VERSION		1.482f
 #define DEFAULT_STARTUP_MODE		0.0f
 #define DEFAULT_BAUD_RATE		230400
 
@@ -34,6 +34,9 @@
 #define DEFAULT_CL3TERM			0.0f
 #define DEFAULT_CL4TERM			0.0f
 #define DEFAULT_CL5TERM			0.0f
+
+#define DEFAULT_THR1TERM			0.0f
+#define DEFAULT_THR2TERM			1.0f
 
 #define DEFAULT_SHUNT_RESISTANCE	0.5f	    // milli Ohms
 #define DEFAULT_MIN_PERIOD		50.0f	    // us
@@ -76,6 +79,8 @@ enum configParameters {
     CL3TERM,
     CL4TERM,
     CL5TERM,
+    THR1TERM,
+    THR2TERM,
     SHUNT_RESISTANCE,
     MIN_PERIOD,
     MAX_PERIOD,

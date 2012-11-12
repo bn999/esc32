@@ -42,6 +42,8 @@ const char *configParameterStrings[] = {
     "CL3TERM",
     "CL4TERM",
     "CL5TERM",
+    "THR1TERM",
+    "THR2TERM",
     "SHUNT_RESISTANCE",
     "MIN_PERIOD",
     "MAX_PERIOD",
@@ -77,6 +79,8 @@ const char *configFormatStrings[] = {
     "%+e",	    // CL3TERM
     "%+e",	    // CL4TERM
     "%+e",	    // CL5TERM
+    "%+e",	    // THR1TERM
+    "%+e",	    // THR2TERM
     "%.3f mohms",   // SHUNT_RESISTANCE
     "%.0f us",	    // MIN_PERIOD
     "%.0f us",	    // MAX_PERIOD
@@ -185,6 +189,8 @@ void configLoadDefault(void) {
     p[CL3TERM] = DEFAULT_CL3TERM;
     p[CL4TERM] = DEFAULT_CL4TERM;
     p[CL5TERM] = DEFAULT_CL5TERM;
+    p[THR1TERM] = DEFAULT_THR1TERM;
+    p[THR2TERM] = DEFAULT_THR2TERM;
     p[SHUNT_RESISTANCE] = DEFAULT_SHUNT_RESISTANCE;
     p[MIN_PERIOD] = DEFAULT_MIN_PERIOD;
     p[MAX_PERIOD] = DEFAULT_MAX_PERIOD;
