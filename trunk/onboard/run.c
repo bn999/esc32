@@ -121,8 +121,15 @@ void runArm(void) {
 }
 
 void runStart(void) {
-    state = ESC_STATE_STARTING;
-    fetStartCommutation();
+   if((p[START_ALIGN_TIME] == 0) && (p[START_STEPS_NUM] == 0))
+   {
+      state = ESC_STATE_STARTING;
+      fetStartCommutation();
+   }
+   else
+   {
+      motorStartSeqInit();
+   }
 }
 
 void runStop(void) {
@@ -145,6 +152,14 @@ uint8_t runDuty(float duty) {
 
 void runNewInput(uint16_t setpoint) {
     static uint16_t lastPwm;
+    static float filteredSetpoint = 0;
+
+    // Lowpass Input if configured 
+    if(p[PWM_LOWPASS]) 
+    {
+      filteredSetpoint = (p[PWM_LOWPASS] * filteredSetpoint + (float)setpoint) / (1.0f + p[PWM_LOWPASS]);
+      setpoint = filteredSetpoint;
+    }
 
     if (state == ESC_STATE_RUNNING && setpoint != lastPwm) {
 	if (runMode == OPEN_LOOP) {
@@ -166,6 +181,7 @@ void runNewInput(uint16_t setpoint) {
 
 	    // Calculate MAX_THRUST from PWM_RPM_SCALE (which is MAX_RPM) and THRxTERMs
 	    // Based on "thrust = rpm * a1 + rpm^2 * a2"
+	    // TODO: Calculate this constant only once, not on every "runNewInput"
 	    maxThrust = p[PWM_RPM_SCALE] * p[THR1TERM] + p[PWM_RPM_SCALE] * p[PWM_RPM_SCALE] * p[THR2TERM];
 
 	    // Calculate targetThrust based on input and MAX_THRUST
@@ -190,7 +206,7 @@ void runNewInput(uint16_t setpoint) {
 
 	lastPwm = setpoint;
     }
-    else if (state == ESC_STATE_STARTING && setpoint <= pwmLoValue) {
+    else if ((state == ESC_STATE_NOCOMM || state == ESC_STATE_STARTING) && setpoint <= pwmLoValue) {
 	fetSetDutyCycle(0);
 	state = ESC_STATE_RUNNING;
     }

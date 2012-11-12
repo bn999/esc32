@@ -295,7 +295,7 @@ void DMA1_Channel1_IRQHandler(void) {
 	avgB += valB - histB[histIndex];
 	avgC += valC - histC[histIndex];
 
-	if ((avgA+avgB+avgC)/histSize > (ADC_MIN_COMP*3) && state != ESC_STATE_DISARMED) {
+	if ((avgA+avgB+avgC)/histSize > (ADC_MIN_COMP*3) && state != ESC_STATE_DISARMED && state != ESC_STATE_NOCOMM) {
 	    register int32_t periodMicros;
 
 	    periodMicros = (currentMicros >= detectedCrossing) ? (currentMicros - detectedCrossing) : (TIMER_MASK - detectedCrossing + currentMicros);

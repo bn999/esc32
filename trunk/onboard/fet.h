@@ -132,6 +132,8 @@ extern void fetBeep(uint16_t freq, uint16_t duration);
 extern void fetCommutate(int unused);
 extern void fetSetStep(int n);
 extern void fetSetDutyCycle(int32_t dutyCycle);
+extern void motorStartSeqInit (void);
+extern void motorStartSeq (int period);
 extern void fetStartCommutation(void);
 extern void fetSetConstants(void);
 extern void fetSetBraking(int8_t value);
