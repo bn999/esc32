@@ -46,6 +46,7 @@ uint8_t disarmReason;
 uint8_t commandMode;
 uint8_t runArmCount;
 volatile uint8_t runMode;
+float maxThrust;
 
 void runFeedIWDG(void) {
 #ifdef RUN_ENABLE_IWDG
@@ -121,6 +122,14 @@ void runArm(void) {
 }
 
 void runStart(void) {
+
+   // Calculate MAX_THRUST from PWM_RPM_SCALE (which is MAX_RPM) and THRxTERMs
+   // Based on "thrust = rpm * a1 + rpm^2 * a2"
+   maxThrust = p[PWM_RPM_SCALE] * p[THR1TERM] + p[PWM_RPM_SCALE] * p[PWM_RPM_SCALE] * p[THR2TERM];
+
+   // reset integral bevore new motor startup
+   runRpmPIDReset();
+
    if((p[START_ALIGN_TIME] == 0) && (p[START_STEPS_NUM] == 0))
    {
       state = ESC_STATE_STARTING;
@@ -155,6 +164,7 @@ void runNewInput(uint16_t setpoint) {
     static float filteredSetpoint = 0;
 
     // Lowpass Input if configured 
+    // TODO: Make lowpass independent from pwm update rate
     if(p[PWM_LOWPASS]) 
     {
       filteredSetpoint = (p[PWM_LOWPASS] * filteredSetpoint + (float)setpoint) / (1.0f + p[PWM_LOWPASS]);
@@ -175,14 +185,8 @@ void runNewInput(uint16_t setpoint) {
 	// THRUST Mode
 	else if (runMode == CLOSED_LOOP_THRUST) {
 
-	    float maxThrust;     // thrust at PWM_RPM_SCALE (MAX_RPM)
 	    float targetThrust;  // desired trust
 	    float target;        // target(rpm)
-
-	    // Calculate MAX_THRUST from PWM_RPM_SCALE (which is MAX_RPM) and THRxTERMs
-	    // Based on "thrust = rpm * a1 + rpm^2 * a2"
-	    // TODO: Calculate this constant only once, not on every "runNewInput"
-	    maxThrust = p[PWM_RPM_SCALE] * p[THR1TERM] + p[PWM_RPM_SCALE] * p[PWM_RPM_SCALE] * p[THR2TERM];
 
 	    // Calculate targetThrust based on input and MAX_THRUST
 	    targetThrust = maxThrust * (setpoint-pwmLoValue) / (pwmHiValue - pwmLoValue);
@@ -196,8 +200,7 @@ void runNewInput(uint16_t setpoint) {
 	    // targetThrust is negative (pwm_in < pwmLoValue)
 	    else 
 	    {
-	    	// same behaviour like RPM mode.
-	    	target = p[PWM_RPM_SCALE] * (setpoint-pwmLoValue) / (pwmHiValue - pwmLoValue);
+	    	target = 0.0f;
 	    }
 
 	    // upper limit for targetRpm is configured maximum PWM_RPM_SCALE (which is MAX_RPM)
