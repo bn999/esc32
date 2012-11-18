@@ -34,7 +34,9 @@ const char *configParameterStrings[] = {
     "STARTUP_MODE",
     "BAUD_RATE",
     "PTERM",
+    "PNFAC",
     "ITERM",
+    "INFAC",
     "FF1TERM",
     "FF2TERM",
     "CL1TERM",
@@ -69,6 +71,7 @@ const char *configParameterStrings[] = {
     "PWM_MIN_START",
     "PWM_RPM_SCALE",
     "PWM_LOWPASS",
+    "RPM_MEAS_LP",
     "FET_BRAKING"
 };
 
@@ -77,7 +80,9 @@ const char *configFormatStrings[] = {
     "%.0f",	    // STARTUP_MODE
     "%.0f baud",    // BAUD_RATE
     "%.3f",	    // PTERM
+    "%.2f",	    // PNFAC
     "%.5f",	    // ITERM
+    "%.2f",	    // INFAC
     "%+e",	    // FF1TERM
     "%+e",	    // FF2TERM
     "%+e",	    // CL1TERM
@@ -112,6 +117,7 @@ const char *configFormatStrings[] = {
     "%.0f us",	    // PWM_MIN_START
     "%.0f RPM",	    // PWM_RPM_SCALE
     "%2.2f",	    // PWM_LOWPASS
+    "%.3f",	    // RPM_MEAS_LP
     "%.0f"	    // FET_BRAKING
 };
 
@@ -193,7 +199,9 @@ void configLoadDefault(void) {
     p[STARTUP_MODE] = DEFAULT_STARTUP_MODE;
     p[BAUD_RATE] = DEFAULT_BAUD_RATE;
     p[PTERM] = DEFAULT_PTERM;
+    p[PNFAC] = DEFAULT_PNFAC;
     p[ITERM] = DEFAULT_ITERM;
+    p[INFAC] = DEFAULT_INFAC;
     p[FF1TERM] = DEFAULT_FF1TERM;
     p[FF2TERM] = DEFAULT_FF2TERM;
     p[CL1TERM] = DEFAULT_CL1TERM;
@@ -228,6 +236,7 @@ void configLoadDefault(void) {
     p[PWM_MIN_START] = DEFAULT_PWM_MIN_START;
     p[PWM_RPM_SCALE] = DEFAULT_PWM_RPM_SCALE;
     p[PWM_LOWPASS] = DEFAULT_PWM_LOWPASS;
+    p[RPM_MEAS_LP] = DEFAULT_RPM_MEAS_LP;
     p[FET_BRAKING] = DEFAULT_FET_BRAKING;
 
     configRecalcConst();

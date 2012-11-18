@@ -123,10 +123,6 @@ void runArm(void) {
 
 void runStart(void) {
 
-   // Calculate MAX_THRUST from PWM_RPM_SCALE (which is MAX_RPM) and THRxTERMs
-   // Based on "thrust = rpm * a1 + rpm^2 * a2"
-   maxThrust = p[PWM_RPM_SCALE] * p[THR1TERM] + p[PWM_RPM_SCALE] * p[PWM_RPM_SCALE] * p[THR2TERM];
-
    // reset integral bevore new motor startup
    runRpmPIDReset();
 
@@ -298,8 +294,8 @@ int32_t runRpmPID(float rpm, float target) {
 	rpmI += error * p[ITERM];
     }
     else {
-	rpmP =  error * p[PTERM] * 10.0f;
-	rpmI += error * p[ITERM] * 0.15f;
+	rpmP =  error * p[PTERM] * p[PNFAC];
+	rpmI += error * p[ITERM] * p[INFAC];
     }
 
     if (fetBrakingEnabled) {
@@ -327,7 +323,9 @@ uint8_t runRpm(void) {
     if (state > ESC_STATE_STARTING) {
 //	rpm = rpm * 0.90f + (runRPMFactor / (float)crossingPeriod) * 0.10f;
 //	rpm -= (rpm - (runRPMFactor / (float)crossingPeriod)) * 0.25f;
-	rpm = (rpm + (runRPMFactor / (float)crossingPeriod)) * 0.5f;
+//	rpm = (rpm + (runRPMFactor / (float)crossingPeriod)) * 0.5f;
+//	rpm = (rpm + ((32768.0f * runRPMFactor) / (float)adcCrossingPeriod)) * 0.5f; // increased resolution, fixed filter here
+	rpm = p[RPM_MEAS_LP] * rpm + ((32768.0f * runRPMFactor) / (float)adcCrossingPeriod) * (1.0f - p[RPM_MEAS_LP]); // increased resolution, variable filter here
 
 	// run closed loop control
 	if (runMode == CLOSED_LOOP_RPM) {
@@ -508,4 +506,8 @@ void runSetConstants(void) {
     p[MOTOR_POLES] = (int)p[MOTOR_POLES];
     p[STARTUP_MODE] = startupMode;
     p[MAX_CURRENT] = maxCurrent;
+
+    // Calculate MAX_THRUST from PWM_RPM_SCALE (which is MAX_RPM) and THRxTERMs
+    // Based on "thrust = rpm * a1 + rpm^2 * a2"
+    maxThrust = p[PWM_RPM_SCALE] * p[THR1TERM] + p[PWM_RPM_SCALE] * p[PWM_RPM_SCALE] * p[THR2TERM];
 }
