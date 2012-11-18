@@ -84,6 +84,7 @@ extern int16_t histSize;
 extern uint32_t avgA, avgB, avgC;
 extern volatile uint32_t detectedCrossing;
 extern volatile uint32_t crossingPeriod;
+extern volatile int32_t adcCrossingPeriod;
 
 extern void adcInit(void);
 extern void adcSetConstants(void);

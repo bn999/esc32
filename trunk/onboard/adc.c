@@ -54,7 +54,7 @@ uint8_t adcStateA, adcStateB, adcStateC;
 
 volatile uint32_t detectedCrossing;
 volatile uint32_t crossingPeriod;
-int32_t adcCrossingPeriod;
+volatile int32_t adcCrossingPeriod;
 uint32_t nextCrossingDetect;
 uint32_t numLoops;
 

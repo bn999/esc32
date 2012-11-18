@@ -19,12 +19,14 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-#define DEFAULT_CONFIG_VERSION		1.483f
+#define DEFAULT_CONFIG_VERSION		1.484f
 #define DEFAULT_STARTUP_MODE		0.0f
 #define DEFAULT_BAUD_RATE		230400
 
 #define DEFAULT_PTERM			0.25f
+#define DEFAULT_PNFAC		   10.0f
 #define DEFAULT_ITERM			0.0006f
+#define DEFAULT_INFAC			0.15f
 
 #define DEFAULT_FF1TERM			0.0f
 #define DEFAULT_FF2TERM			0.0f
@@ -64,7 +66,9 @@
 #define DEFAULT_PWM_MAX_VALUE		2250	    // maximum to consider pulse a valid signal
 #define DEFAULT_PWM_MIN_START		1100	    // minimum value required to start
 
-#define DEFAULT_PWM_LOWPASS  0.0f      // lowpass on PWM input values
+#define DEFAULT_PWM_LOWPASS  0.0f      // lowpass on PWM input values (0 = none, 10 = heavy, no upper limit)
+#define DEFAULT_RPM_MEAS_LP  0.5f      // lowpass measured RPM values for closed loop control (0 = none, 0.99 = max, >=1 not allowed)
+
 #define DEFAULT_PWM_RPM_SCALE		6500	    // RPM equivalent of maximum PWM IN in CLOSED_LOOP mode
 
 #define DEFAULT_FET_BRAKING		0
@@ -77,7 +81,9 @@ enum configParameters {
     STARTUP_MODE,
     BAUD_RATE,
     PTERM,
+    PNFAC,
     ITERM,
+    INFAC,
     FF1TERM,
     FF2TERM,
     CL1TERM,
@@ -112,6 +118,7 @@ enum configParameters {
     PWM_MIN_START,
     PWM_RPM_SCALE,
     PWM_LOWPASS,
+    RPM_MEAS_LP,
     FET_BRAKING,
     CONFIG_NUM_PARAMS
 };
