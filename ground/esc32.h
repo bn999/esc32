@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with AutoQuad.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright © 2011, 2012  Bill Nesbitt
+    Copyright © 2011, 2012, 2013  Bill Nesbitt
 */
 
 #define DEFAULT_PORT		"/dev/cu.usbserial-FTELPQ1S"
@@ -64,7 +64,9 @@ enum configParameters {
     STARTUP_MODE,
     BAUD_RATE,
     PTERM,
+    PNFAC,
     ITERM,
+    INFAC,
     FF1TERM,
     FF2TERM,
     CL1TERM,
@@ -72,12 +74,19 @@ enum configParameters {
     CL3TERM,
     CL4TERM,
     CL5TERM,
+    THR1TERM,
+    THR2TERM,
     SHUNT_RESISTANCE,
     MIN_PERIOD,
     MAX_PERIOD,
     BLANKING_MICROS,
     ADVANCE,
     START_VOLTAGE,
+    START_ALIGN_TIME,
+    START_ALIGN_VOLTAGE,
+    START_STEPS_NUM,
+    START_STEPS_PERIOD,
+    START_STEPS_ACCEL,
     GOOD_DETECTS_START,
     BAD_DETECTS_DISARM,
     MAX_CURRENT,
@@ -91,6 +100,9 @@ enum configParameters {
     PWM_MAX_VALUE,
     PWM_MIN_START,
     PWM_RPM_SCALE,
+    PWM_LOWPASS,
+    RPM_MEAS_LP,
     FET_BRAKING,
     CONFIG_NUM_PARAMS
 };
+
