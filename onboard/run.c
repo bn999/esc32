@@ -122,19 +122,16 @@ void runArm(void) {
 }
 
 void runStart(void) {
-
    // reset integral bevore new motor startup
    runRpmPIDReset();
 
-   if((p[START_ALIGN_TIME] == 0) && (p[START_STEPS_NUM] == 0))
-   {
-      state = ESC_STATE_STARTING;
-      fetStartCommutation();
-   }
-   else
-   {
-      motorStartSeqInit();
-   }
+    if((p[START_ALIGN_TIME] == 0) && (p[START_STEPS_NUM] == 0)) {
+	state = ESC_STATE_STARTING;
+	fetStartCommutation(0);
+    }
+    else {
+	motorStartSeqInit();
+    }
 }
 
 void runStop(void) {
@@ -159,9 +156,9 @@ void runNewInput(uint16_t setpoint) {
     static uint16_t lastPwm;
     static float filteredSetpoint = 0;
 
-    // Lowpass Input if configured 
+    // Lowpass Input if configured
     // TODO: Make lowpass independent from pwm update rate
-    if(p[PWM_LOWPASS]) 
+    if(p[PWM_LOWPASS])
     {
       filteredSetpoint = (p[PWM_LOWPASS] * filteredSetpoint + (float)setpoint) / (1.0f + p[PWM_LOWPASS]);
       setpoint = filteredSetpoint;
@@ -194,7 +191,7 @@ void runNewInput(uint16_t setpoint) {
 	    	target = ((sqrtf(p[THR1TERM] * p[THR1TERM] + 4.0f * p[THR2TERM] * targetThrust) - p[THR1TERM] ) / ( 2.0f * p[THR2TERM] ));
 	    }
 	    // targetThrust is negative (pwm_in < pwmLoValue)
-	    else 
+	    else
 	    {
 	    	target = 0.0f;
 	    }
