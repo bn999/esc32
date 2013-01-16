@@ -73,6 +73,7 @@ const char *cliInputModes[] = {
 const char *cliStates[] = {
     "DISARMED",
     "STOPPED",
+    "PRE-START",
     "STARTING",
     "RUNNING"
 };
