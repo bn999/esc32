@@ -134,7 +134,7 @@ extern void fetSetStep(int n);
 extern void fetSetDutyCycle(int32_t dutyCycle);
 extern void motorStartSeqInit (void);
 extern void motorStartSeq (int period);
-extern void fetStartCommutation(void);
+extern void fetStartCommutation(uint8_t startStep);
 extern void fetSetConstants(void);
 extern void fetSetBraking(int8_t value);
 extern void _fetSetDutyCycle(int32_t dutyCycle);

@@ -556,96 +556,23 @@ void fetCommutate(int period) {
 }
 
 // initiates motor start sequence
-void motorStartSeqInit (void)
-{
-   // set globals to start position
-   startSeqCnt = 0;
-   startSeqStp = 1;
+void motorStartSeqInit(void) {
+    // set globals to start position
+    startSeqCnt = 0;
+    startSeqStp = fetNextStep;
 
-   // set first step
-   fetSetBraking(0);
-   fetSetStep(startSeqStp);
+    // set first step
+    fetSetBraking(0);
+    fetSetStep(startSeqStp);
 
-   // Start sequence will run Without commutation.
-   state = ESC_STATE_NOCOMM;
+    // Start sequence will run Without commutation.
+    state = ESC_STATE_NOCOMM;
 
-   // start "motorStartSeq"
-   timerSetAlarm2(0, motorStartSeq, 0);
+    // start "motorStartSeq"
+    timerSetAlarm2(0, motorStartSeq, 0);
 }
 
-// generates motor start sequence
-void motorStartSeq (int period)
-{
-   int nextPeriod;
-
-   // Static field to align rotor. Without commutation.
-   if(startSeqCnt < p[START_ALIGN_TIME])
-   {
-      // PWM ramp up
-      fetStartDuty = p[START_ALIGN_VOLTAGE] * ((float)startSeqCnt / p[START_ALIGN_TIME]) / avgVolts * fetPeriod;
-      fetDutyCycle = fetStartDuty;
-      _fetSetDutyCycle(fetDutyCycle);
-
-      // Prepare next function call
-      period     = 1000; // 1 ms
-      nextPeriod = 1000;
-      timerSetAlarm2(period, motorStartSeq, nextPeriod);
-   }
-   // Rotating field with optional acceleration but without commutation.
-   else if(startSeqCnt < (p[START_ALIGN_TIME] + p[START_STEPS_NUM]))
-   {
-
-      // One time if entering "Rotating field"
-      if(startSeqCnt == p[START_ALIGN_TIME]) 
-         period = p[START_STEPS_PERIOD];
-
-      // Set next step
-      startSeqStp++;
-      if (startSeqStp > 6) startSeqStp = 1;
-      fetSetStep(startSeqStp);
-
-      // Set PWM
-      fetStartDuty = p[START_VOLTAGE] / avgVolts * fetPeriod;
-      fetDutyCycle = fetStartDuty;
-      _fetSetDutyCycle(fetDutyCycle);
-
-      // Prepare next function call
-      nextPeriod = period - p[START_STEPS_ACCEL];
-      if(nextPeriod < p[MIN_PERIOD]) nextPeriod = p[MIN_PERIOD]; // avoid negative period
-      timerSetAlarm2(period, motorStartSeq, nextPeriod);
-   }
-   // Continue normal startup with commutation
-   else
-   {
-      // allow commutation
-      state = ESC_STATE_STARTING;
-
-      // Count next step (for commutation)
-      startSeqStp++;
-      if (startSeqStp > 6) startSeqStp = 1;
-
-      // start like "fetStartCommutation()" but with the right "next step"
-      fetSetBraking(0);
-      fetStartDuty = p[START_VOLTAGE] / avgVolts * fetPeriod;
-      adcSetCrossingPeriod(adcMaxPeriod/2);
-      detectedCrossing = timerMicros;
-      fetDutyCycle = fetStartDuty;
-      _fetSetDutyCycle(fetDutyCycle);
-      adcMaxAmps = 0;
-      fetGoodDetects = 0;
-      fetBadDetects = 0;
-      fetTotalBadDetects = 0;
-      fetNextStep = startSeqStp;
-
-      // start
-      timerSetAlarm2(0, fetMissedCommutate, crossingPeriod);
-   }
-
-   // count up step of startup sequence
-   startSeqCnt++;
-}
-
-void fetStartCommutation(void) {
+void fetStartCommutation(uint8_t startStep) {
     fetSetBraking(0);
     fetStartDuty = p[START_VOLTAGE] / avgVolts * fetPeriod;
     adcSetCrossingPeriod(adcMaxPeriod/2);
@@ -656,10 +583,68 @@ void fetStartCommutation(void) {
     fetGoodDetects = 0;
     fetBadDetects = 0;
     fetTotalBadDetects = 0;
-    fetNextStep = 1;
+    fetNextStep = startStep;
 
     // start
     timerSetAlarm2(0, fetMissedCommutate, crossingPeriod);
+}
+
+// generates motor start sequence
+void motorStartSeq(int period) {
+    int nextPeriod;
+
+    // Static field to align rotor. Without commutation.
+    if (startSeqCnt < p[START_ALIGN_TIME]) {
+	// PWM ramp up
+	fetStartDuty = p[START_ALIGN_VOLTAGE] * ((float)startSeqCnt / p[START_ALIGN_TIME]) / avgVolts * fetPeriod;
+	fetDutyCycle = fetStartDuty;
+	_fetSetDutyCycle(fetDutyCycle);
+
+	// Prepare next function call
+	period     = 1000; // 1 ms
+	nextPeriod = 1000;
+	timerSetAlarm2(period, motorStartSeq, nextPeriod);
+    }
+    // Rotating field with optional acceleration but without commutation.
+    else if (startSeqCnt < (p[START_ALIGN_TIME] + p[START_STEPS_NUM])) {
+	// One time if entering "Rotating field"
+	if (startSeqCnt == p[START_ALIGN_TIME])
+	    period = p[START_STEPS_PERIOD];
+
+	// Set next step
+	startSeqStp++;
+	if (startSeqStp > 6) startSeqStp = 1;
+	    fetSetStep(startSeqStp);
+
+	// Set PWM
+	fetStartDuty = p[START_VOLTAGE] / avgVolts * fetPeriod;
+	fetDutyCycle = fetStartDuty;
+	_fetSetDutyCycle(fetDutyCycle);
+
+	// Prepare next function call
+	nextPeriod = period - p[START_STEPS_ACCEL];
+	if (nextPeriod < p[MIN_PERIOD])
+	    nextPeriod = p[MIN_PERIOD]; // avoid negative period
+	timerSetAlarm2(period, motorStartSeq, nextPeriod);
+    }
+    // Continue normal startup with commutation
+    else {
+	// allow commutation
+	state = ESC_STATE_STARTING;
+
+	// Count next step (for commutation)
+	startSeqStp++;
+	if (startSeqStp > 6)
+	    startSeqStp = 1;
+
+	fetStartCommutation(startSeqStp);
+
+	// start
+	timerSetAlarm2(0, fetMissedCommutate, crossingPeriod);
+    }
+
+    // count up step of startup sequence
+    startSeqCnt++;
 }
 
 void fetTest(void) {
