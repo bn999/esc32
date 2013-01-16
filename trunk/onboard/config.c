@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright © 2011, 2012  Bill Nesbitt
+    Copyright © 2011, 2012, 2013  Bill Nesbitt
 */
 
 #include "config.h"
@@ -34,9 +34,7 @@ const char *configParameterStrings[] = {
     "STARTUP_MODE",
     "BAUD_RATE",
     "PTERM",
-    "PNFAC",
     "ITERM",
-    "INFAC",
     "FF1TERM",
     "FF2TERM",
     "CL1TERM",
@@ -44,19 +42,12 @@ const char *configParameterStrings[] = {
     "CL3TERM",
     "CL4TERM",
     "CL5TERM",
-    "THR1TERM",
-    "THR2TERM",
     "SHUNT_RESISTANCE",
     "MIN_PERIOD",
     "MAX_PERIOD",
     "BLANKING_MICROS",
     "ADVANCE",
     "START_VOLTAGE",
-    "START_ALIGN_TIME",
-    "START_ALIGN_VOLTAGE",
-    "START_STEPS_NUM",
-    "START_STEPS_PERIOD",
-    "START_STEPS_ACCEL",
     "GOOD_DETECTS_START",
     "BAD_DETECTS_DISARM",
     "MAX_CURRENT",
@@ -70,9 +61,18 @@ const char *configParameterStrings[] = {
     "PWM_MAX_VALUE",
     "PWM_MIN_START",
     "PWM_RPM_SCALE",
+    "FET_BRAKING",
+    "PNFAC",
+    "INFAC",
+    "THR1TERM",
+    "THR2TERM",
+    "START_ALIGN_TIME",
+    "START_ALIGN_VOLTAGE",
+    "START_STEPS_NUM",
+    "START_STEPS_PERIOD",
+    "START_STEPS_ACCEL",
     "PWM_LOWPASS",
-    "RPM_MEAS_LP",
-    "FET_BRAKING"
+    "RPM_MEAS_LP"
 };
 
 const char *configFormatStrings[] = {
@@ -80,9 +80,7 @@ const char *configFormatStrings[] = {
     "%.0f",	    // STARTUP_MODE
     "%.0f baud",    // BAUD_RATE
     "%.3f",	    // PTERM
-    "%.2f",	    // PNFAC
     "%.5f",	    // ITERM
-    "%.2f",	    // INFAC
     "%+e",	    // FF1TERM
     "%+e",	    // FF2TERM
     "%+e",	    // CL1TERM
@@ -90,19 +88,12 @@ const char *configFormatStrings[] = {
     "%+e",	    // CL3TERM
     "%+e",	    // CL4TERM
     "%+e",	    // CL5TERM
-    "%+e",	    // THR1TERM
-    "%+e",	    // THR2TERM
     "%.3f mohms",   // SHUNT_RESISTANCE
     "%.0f us",	    // MIN_PERIOD
     "%.0f us",	    // MAX_PERIOD
     "%.0f us",	    // BLANKING_MICROS
     "%.2f Degs",    // ADVANCE
     "%.2f Volts",   // START_VOLTAGE
-    "%.0f ms",  // START_ALIGN_TIME
-    "%.2f Volts",   // START_ALIGN_VOLTAGE
-    "%.0f",	    // START_STEPS_NUM
-    "%.0f us",  // START_STEPS_PERIOD
-    "%.0f us",	 // START_STEPS_ACCEL
     "%.0f",	    // GOOD_DETECTS_START
     "%.0f",	    // BAD_DETECTS_DISARM
     "%.1f Amps",    // MAX_CURRENT
@@ -116,9 +107,18 @@ const char *configFormatStrings[] = {
     "%.0f us",	    // PWM_MAX_VALUE
     "%.0f us",	    // PWM_MIN_START
     "%.0f RPM",	    // PWM_RPM_SCALE
+    "%.0f",	    // FET_BRAKING
+    "%.2f",	    // PNFAC
+    "%.2f",	    // INFAC
+    "%+e",	    // THR1TERM
+    "%+e",	    // THR2TERM
+    "%.0f ms",	    // START_ALIGN_TIME
+    "%.2f Volts",   // START_ALIGN_VOLTAGE
+    "%.0f",	    // START_STEPS_NUM
+    "%.0f us",	    // START_STEPS_PERIOD
+    "%.0f us",	    // START_STEPS_ACCEL
     "%2.2f",	    // PWM_LOWPASS
-    "%.3f",	    // RPM_MEAS_LP
-    "%.0f"	    // FET_BRAKING
+    "%.3f"	    // RPM_MEAS_LP
 };
 
 void configInit(void) {
@@ -199,9 +199,7 @@ void configLoadDefault(void) {
     p[STARTUP_MODE] = DEFAULT_STARTUP_MODE;
     p[BAUD_RATE] = DEFAULT_BAUD_RATE;
     p[PTERM] = DEFAULT_PTERM;
-    p[PNFAC] = DEFAULT_PNFAC;
     p[ITERM] = DEFAULT_ITERM;
-    p[INFAC] = DEFAULT_INFAC;
     p[FF1TERM] = DEFAULT_FF1TERM;
     p[FF2TERM] = DEFAULT_FF2TERM;
     p[CL1TERM] = DEFAULT_CL1TERM;
@@ -209,19 +207,12 @@ void configLoadDefault(void) {
     p[CL3TERM] = DEFAULT_CL3TERM;
     p[CL4TERM] = DEFAULT_CL4TERM;
     p[CL5TERM] = DEFAULT_CL5TERM;
-    p[THR1TERM] = DEFAULT_THR1TERM;
-    p[THR2TERM] = DEFAULT_THR2TERM;
     p[SHUNT_RESISTANCE] = DEFAULT_SHUNT_RESISTANCE;
     p[MIN_PERIOD] = DEFAULT_MIN_PERIOD;
     p[MAX_PERIOD] = DEFAULT_MAX_PERIOD;
     p[BLANKING_MICROS] = DEFAULT_BLANKING_MICROS;
     p[ADVANCE] = DEFAULT_ADVANCE;
     p[START_VOLTAGE] = DEFAULT_START_VOLTAGE;
-    p[START_ALIGN_TIME] = DEFAULT_START_ALIGN_TIME;
-    p[START_ALIGN_VOLTAGE] = DEFAULT_START_ALIGN_VOLTAGE;
-    p[START_STEPS_NUM] = DEFAULT_START_STEPS_NUM;
-    p[START_STEPS_PERIOD] = DEFAULT_START_STEPS_PERIOD;
-    p[START_STEPS_ACCEL] = DEFAULT_START_STEPS_ACCEL;
     p[GOOD_DETECTS_START] = DEFAULT_GOOD_DETECTS_START;
     p[BAD_DETECTS_DISARM] = DEFAULT_BAD_DETECTS_DISARM;
     p[MAX_CURRENT] = DEFAULT_MAX_CURRENT;
@@ -235,9 +226,18 @@ void configLoadDefault(void) {
     p[PWM_MAX_VALUE] = DEFAULT_PWM_MAX_VALUE;
     p[PWM_MIN_START] = DEFAULT_PWM_MIN_START;
     p[PWM_RPM_SCALE] = DEFAULT_PWM_RPM_SCALE;
+    p[FET_BRAKING] = DEFAULT_FET_BRAKING;
+    p[PNFAC] = DEFAULT_PNFAC;
+    p[INFAC] = DEFAULT_INFAC;
+    p[THR1TERM] = DEFAULT_THR1TERM;
+    p[THR2TERM] = DEFAULT_THR2TERM;
+    p[START_ALIGN_TIME] = DEFAULT_START_ALIGN_TIME;
+    p[START_ALIGN_VOLTAGE] = DEFAULT_START_ALIGN_VOLTAGE;
+    p[START_STEPS_NUM] = DEFAULT_START_STEPS_NUM;
+    p[START_STEPS_PERIOD] = DEFAULT_START_STEPS_PERIOD;
+    p[START_STEPS_ACCEL] = DEFAULT_START_STEPS_ACCEL;
     p[PWM_LOWPASS] = DEFAULT_PWM_LOWPASS;
     p[RPM_MEAS_LP] = DEFAULT_RPM_MEAS_LP;
-    p[FET_BRAKING] = DEFAULT_FET_BRAKING;
 
     configRecalcConst();
 }
