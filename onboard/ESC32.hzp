@@ -44,7 +44,7 @@
         <configuration Name="Common" build_always_rebuild="Yes" compile_post_build_command="" compile_pre_build_command="&quot;$(StudioDir)/bin/crossscript&quot; &quot;load(\&quot;$(ProjectDir)/incbuild.js\&quot;);incbuild();&quot;"/>
       </file>
     </folder>
-    <folder Name="STM32 Drivers">
+    <folder Name="STM32 Drivers" file_name="">
       <folder Name="inc">
         <file file_name="stm32f10x_gpio.h"/>
         <file file_name="stm32f10x_rcc.h"/>
@@ -76,6 +76,7 @@
         <file file_name="stm32f10x_flash.c"/>
         <file file_name="stm32f10x_iwdg.c"/>
       </folder>
+      <file file_name="core_cm3.h"/>
     </folder>
     <configuration Name="Debug" gcc_optimization_level="Level 1"/>
     <configuration Name="Release" c_preprocessor_definitions="STARTUP_FROM_RESET" gcc_optimization_level="Level 1"/>
