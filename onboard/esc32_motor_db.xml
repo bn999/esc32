@@ -186,5 +186,19 @@
 				<CL5TERM>+1.038860e+00</CL5TERM>
 			</prop>
 		</motor>
+		<motor model="MT2814-10">
+			<prop model="APC 12x3.8SF">
+				<ADVANCE>10</ADVANCE>
+				<MAX_CURRENT>25.0</MAX_CURRENT>
+				<PWM_RPM_SCALE>7500</PWM_RPM_SCALE>
+				<FF1TERM>+8.498902e-08</FF1TERM>
+				<FF2TERM>+1.126556e-03</FF2TERM>
+				<CL1TERM>+2.040018e-01</CL1TERM>
+				<CL2TERM>+1.129195e-03</CL2TERM>
+				<CL3TERM>+3.933982e-02</CL3TERM>
+				<CL4TERM>-5.343935e-06</CL4TERM>
+				<CL5TERM>+6.620063e-01</CL5TERM>
+			</prop>
+		</motor>
 	</brand>
 </esc32>
