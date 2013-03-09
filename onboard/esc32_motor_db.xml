@@ -142,6 +142,19 @@
 				<CL5TERM>+1.547213e+00</CL5TERM>
 			</prop>
 		</motor>
+		<motor model="MT4008-12">
+			<prop model="Xoar 13x5">
+				<MAX_CURRENT>20.0</MAX_CURRENT>
+				<PWM_RPM_SCALE>7000</PWM_RPM_SCALE>
+				<FF1TERM>+7.301604e-08</FF1TERM>
+				<FF2TERM>+1.667140e-03</FF2TERM>
+				<CL1TERM>+4.536045e-02</CL1TERM>
+				<CL2TERM>+1.691868e-03</CL2TERM>
+				<CL3TERM>-2.397337e-03</CL3TERM>
+				<CL4TERM>+1.556321e-05</CL4TERM>
+				<CL5TERM>+9.611021e-01</CL5TERM>
+			</prop>
+		</motor>
 		<motor model="MT3506">
 			<prop model="APC 11x4.7SF">
 				<MAX_CURRENT>10.0</MAX_CURRENT>
