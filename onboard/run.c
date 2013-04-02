@@ -125,7 +125,7 @@ void runStart(void) {
    // reset integral bevore new motor startup
    runRpmPIDReset();
 
-    if((p[START_ALIGN_TIME] == 0) && (p[START_STEPS_NUM] == 0)) {
+    if ((p[START_ALIGN_TIME] == 0) && (p[START_STEPS_NUM] == 0)) {
 	state = ESC_STATE_STARTING;
 	fetStartCommutation(0);
     }
@@ -158,10 +158,9 @@ void runNewInput(uint16_t setpoint) {
 
     // Lowpass Input if configured
     // TODO: Make lowpass independent from pwm update rate
-    if(p[PWM_LOWPASS])
-    {
-      filteredSetpoint = (p[PWM_LOWPASS] * filteredSetpoint + (float)setpoint) / (1.0f + p[PWM_LOWPASS]);
-      setpoint = filteredSetpoint;
+    if (p[PWM_LOWPASS]) {
+	filteredSetpoint = (p[PWM_LOWPASS] * filteredSetpoint + (float)setpoint) / (1.0f + p[PWM_LOWPASS]);
+	setpoint = filteredSetpoint;
     }
 
     if (state == ESC_STATE_RUNNING && setpoint != lastPwm) {
@@ -174,10 +173,8 @@ void runNewInput(uint16_t setpoint) {
 	    // limit to configured maximum
 	    targetRpm = (target > p[PWM_RPM_SCALE]) ? p[PWM_RPM_SCALE] : target;
 	}
-
 	// THRUST Mode
 	else if (runMode == CLOSED_LOOP_THRUST) {
-
 	    float targetThrust;  // desired trust
 	    float target;        // target(rpm)
 
@@ -185,14 +182,12 @@ void runNewInput(uint16_t setpoint) {
 	    targetThrust = maxThrust * (setpoint-pwmLoValue) / (pwmHiValue - pwmLoValue);
 
 	    // Workaraound: Negative targetThrust will screw up sqrtf() and create MAX_RPM on throttle min. Dangerous!
-	    if (targetThrust > 0.0f)
-	    {
+	    if (targetThrust > 0.0f) {
 	    	// Calculate target(rpm) based on targetThrust
 	    	target = ((sqrtf(p[THR1TERM] * p[THR1TERM] + 4.0f * p[THR2TERM] * targetThrust) - p[THR1TERM] ) / ( 2.0f * p[THR2TERM] ));
 	    }
 	    // targetThrust is negative (pwm_in < pwmLoValue)
-	    else
-	    {
+	    else {
 	    	target = 0.0f;
 	    }
 

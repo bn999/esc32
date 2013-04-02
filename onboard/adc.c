@@ -318,6 +318,10 @@ void DMA1_Channel1_IRQHandler(void) {
 		else if (adcStateB && avgB <= (avgA+avgC)>>1) {
 		    adcStateB = 0;
 		    nextStep = 1;
+
+#ifdef ESC_DEBUG
+	digitalTogg(tp);
+#endif
 		}
 		else if (!adcStateC && avgC >= (avgA+avgB)>>1) {
 		    adcStateC = 1;

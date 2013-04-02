@@ -545,8 +545,9 @@ void fetCommutate(int period) {
 	// in case of missed zc
 	if (state == ESC_STATE_RUNNING)
 	    timerSetAlarm2(period + period/2, fetMissedCommutate, period);
-//	else if (state == ESC_STATE_STARTING)
+	else if (state == ESC_STATE_STARTING)
 //	    timerSetAlarm2(period*2, fetMissedCommutate, period*2);
+	    timerSetAlarm2(period + period/2, fetMissedCommutate, period);
     }
     else {
 	fetBadDetects++;
@@ -637,10 +638,8 @@ void motorStartSeq(int period) {
 	if (startSeqStp > 6)
 	    startSeqStp = 1;
 
-	fetStartCommutation(startSeqStp);
-
 	// start
-	timerSetAlarm2(0, fetMissedCommutate, crossingPeriod);
+	fetStartCommutation(startSeqStp);
     }
 
     // count up step of startup sequence
