@@ -19,7 +19,7 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-#define VERSION			"1.4.2"
+#define VERSION			"1.4.3"
 
 #include "digital.h"
 
