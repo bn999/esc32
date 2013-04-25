@@ -13,13 +13,13 @@
     You should have received a copy of the GNU General Public License
     along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright © 2011, 2012  Bill Nesbitt
+    Copyright © 2011, 2012, 2013  Bill Nesbitt
 */
 
 #ifndef _MAIN_H
 #define _MAIN_H
 
-#define VERSION			"1.4.3"
+#define VERSION			"1.5.0"
 
 #include "digital.h"
 

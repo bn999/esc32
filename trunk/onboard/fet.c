@@ -350,13 +350,13 @@ void fetSetBaseTime(int32_t period) {
     TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
     TIM_TimeBaseStructure.TIM_Prescaler = 1;                      // 36Mhz
     TIM_TimeBaseStructure.TIM_Period = period;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_CenterAligned1;
     TIM_TimeBaseInit(FET_MASTER_TIMER, &TIM_TimeBaseStructure);
 
     TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
     TIM_TimeBaseStructure.TIM_Prescaler = 1;                      // 36Mhz
     TIM_TimeBaseStructure.TIM_Period = period-1;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_CenterAligned1;
     TIM_TimeBaseInit(FET_H_TIMER, &TIM_TimeBaseStructure);
 }
 
@@ -722,7 +722,7 @@ void fetSetConstants(void) {
     else
 	fetBraking = 0.0f;
 
-    fetSwitchFreq = switchFreq * 1000;
+    fetSwitchFreq = switchFreq * 1000 * 2;
     fetPeriod = FET_AHB_FREQ/fetSwitchFreq;     // bus speed / switching frequency - depends on fetSwitchFreq
     fetSetBaseTime(fetPeriod);
 
