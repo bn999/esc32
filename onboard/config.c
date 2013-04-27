@@ -124,10 +124,10 @@ const char *configFormatStrings[] = {
     "%.0f us",	    // START_STEPS_ACCEL
     "%2.2f",	    // PWM_LOWPASS
     "%.3f",	    // RPM_MEAS_LP
-    "%.1f",	    // SERVO_DUTY
+    "%.1f %%",	    // SERVO_DUTY
     "%.3f",	    // SERVO_P
     "%.3f",	    // SERVO_D
-    "%.1f deg/s",    // SERVO_MAX_RATE
+    "%.1f deg/s",   // SERVO_MAX_RATE
     "%.1f deg"	    // SERVO_SCALE
 };
 

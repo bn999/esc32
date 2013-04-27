@@ -81,7 +81,9 @@ void fetCreateSine(void) {
 
     for (i = 0; i < FET_SERVO_RESOLUTION; i++) {
 	a = M_PI * 2.0f * i / FET_SERVO_RESOLUTION;
-	fetSine[i] = sinf(a) * (float)fetPeriod / 2.0f;
+
+	// third order harmonic injection
+	fetSine[i] = (sinf(a) + sin(a*3.0f)/6.0f) * (2.0f/sqrtf(3.0f)) * (float)fetPeriod / 2.0f;
     }
 }
 

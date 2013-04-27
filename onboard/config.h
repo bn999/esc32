@@ -19,7 +19,7 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-#define DEFAULT_CONFIG_VERSION		1.502f
+#define DEFAULT_CONFIG_VERSION		1.503f
 #define DEFAULT_STARTUP_MODE		0.0f
 #define DEFAULT_BAUD_RATE		230400
 
@@ -73,7 +73,7 @@
 
 #define DEFAULT_FET_BRAKING		0
 
-#define DEFAULT_SERVO_DUTY		20.0f	    // %
+#define DEFAULT_SERVO_DUTY		16.0f	    // %
 #define DEFAULT_SERVO_P			0.05f
 #define DEFAULT_SERVO_D			0.0f
 #define DEFAULT_SERVO_MAX_RATE		1000.0f	    // deg/s
