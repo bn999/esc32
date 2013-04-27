@@ -113,11 +113,18 @@ void runArm(void) {
     fetSetDutyCycle(0);
     timerCancelAlarm2();
     digitalHi(errorLed);
-    state = ESC_STATE_STOPPED;
     digitalLo(statusLed);   // turn on
-    if (inputMode == ESC_INPUT_UART)
-	runMode = OPEN_LOOP;
-    fetSetBraking(0);
+
+    if (runMode == SERVO_MODE) {
+	state = ESC_STATE_RUNNING;
+    }
+    else {
+	state = ESC_STATE_STOPPED;
+	if (inputMode == ESC_INPUT_UART)
+	    runMode = OPEN_LOOP;
+	fetSetBraking(0);
+    }
+
     fetBeep(150, 800);
 }
 
@@ -194,6 +201,9 @@ void runNewInput(uint16_t setpoint) {
 	    // upper limit for targetRpm is configured maximum PWM_RPM_SCALE (which is MAX_RPM)
 	    targetRpm = (target > p[PWM_RPM_SCALE]) ? p[PWM_RPM_SCALE] : target;
 	}
+	else if (runMode == SERVO_MODE) {
+	    fetSetAngleFromPwm(setpoint);
+	}
 
 	lastPwm = setpoint;
     }
@@ -239,7 +249,6 @@ void runWatchDog(void) {
 		runDisarm(REASON_PWM_TIMEOUT);
 	}
 
-//	if (state == ESC_STATE_RUNNING && d > ADC_CROSSING_TIMEOUT) {
 	if (state >= ESC_STATE_STARTING && d > ADC_CROSSING_TIMEOUT) {
 	    if (fetDutyCycle > 0) {
 		runDisarm(REASON_CROSSING_TIMEOUT);
@@ -448,15 +457,20 @@ void SysTick_Handler(void) {
     avgAmps = (adcAvgAmps - adcAmpsOffset) * adcToAmps;
     maxAmps = (adcMaxAmps - adcAmpsOffset) * adcToAmps;
 
-    runWatchDog();
+    if (runMode == SERVO_MODE) {
+	fetUpdateServo();
+    }
+    else {
+	runWatchDog();
+
+	runRpm();
+
+	runThrotLim(fetDutyCycle);
+    }
 
     idlePercent = 100.0f * (idleCounter-oldIdleCounter) * minCycles / totalCycles;
     oldIdleCounter = idleCounter;
     totalCycles = 0;
-
-    runRpm();
-
-    runThrotLim(fetDutyCycle);
 
     if (commandMode == CLI_MODE)
 	cliCheck();

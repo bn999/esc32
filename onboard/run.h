@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright © 2011, 2012  Bill Nesbitt
+    Copyright © 2011, 2012, 2013  Bill Nesbitt
 */
 
 #ifndef _RUN_H
@@ -38,6 +38,7 @@ enum runModes {
     OPEN_LOOP = 0,
     CLOSED_LOOP_RPM,
     CLOSED_LOOP_THRUST,
+    SERVO_MODE,
     NUM_RUN_MODES
 };
 

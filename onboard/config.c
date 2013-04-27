@@ -72,7 +72,12 @@ const char *configParameterStrings[] = {
     "START_STEPS_PERIOD",
     "START_STEPS_ACCEL",
     "PWM_LOWPASS",
-    "RPM_MEAS_LP"
+    "RPM_MEAS_LP",
+    "SERVO_DUTY",
+    "SERVO_P",
+    "SERVO_D",
+    "SERVO_MAX_RATE",
+    "SERVO_SCALE"
 };
 
 const char *configFormatStrings[] = {
@@ -118,7 +123,12 @@ const char *configFormatStrings[] = {
     "%.0f us",	    // START_STEPS_PERIOD
     "%.0f us",	    // START_STEPS_ACCEL
     "%2.2f",	    // PWM_LOWPASS
-    "%.3f"	    // RPM_MEAS_LP
+    "%.3f",	    // RPM_MEAS_LP
+    "%.1f",	    // SERVO_DUTY
+    "%.3f",	    // SERVO_P
+    "%.3f",	    // SERVO_D
+    "%.1f deg/s",    // SERVO_MAX_RATE
+    "%.1f deg"	    // SERVO_SCALE
 };
 
 void configInit(void) {
@@ -238,6 +248,11 @@ void configLoadDefault(void) {
     p[START_STEPS_ACCEL] = DEFAULT_START_STEPS_ACCEL;
     p[PWM_LOWPASS] = DEFAULT_PWM_LOWPASS;
     p[RPM_MEAS_LP] = DEFAULT_RPM_MEAS_LP;
+    p[SERVO_DUTY] = DEFAULT_SERVO_DUTY;
+    p[SERVO_P] = DEFAULT_SERVO_P;
+    p[SERVO_D] = DEFAULT_SERVO_D;
+    p[SERVO_MAX_RATE] = DEFAULT_SERVO_MAX_RATE;
+    p[SERVO_SCALE] = DEFAULT_SERVO_SCALE;
 
     configRecalcConst();
 }
