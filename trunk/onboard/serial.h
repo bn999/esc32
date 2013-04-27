@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright © 2011, 2012  Bill Nesbitt
+    Copyright © 2011, 2012, 2013  Bill Nesbitt
 */
 
 #ifndef _SERIAL_H
@@ -35,7 +35,7 @@
 #define SERIAL_MIN_BAUD		9600
 #define SERIAL_MAX_BAUD		921600
 
-#define SERIAL_TX_BUFSIZE	8192
+#define SERIAL_TX_BUFSIZE	4096
 #define SERIAL_RX_BUFSIZE	256
 
 typedef struct {

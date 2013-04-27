@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright © 2011, 2012  Bill Nesbitt
+    Copyright © 2011, 2012, 2013  Bill Nesbitt
 */
 
 #ifndef _CLI_H
@@ -43,6 +43,7 @@ extern void cliFuncDuty(void *cmd, char *cmdLine);
 extern void cliFuncHelp(void *cmd, char *cmdLine);
 extern void cliFuncInput(void *cmd, char *cmdLine);
 extern void cliFuncMode(void *cmd, char *cmdLine);
+extern void cliFuncPos(void *cmd, char *cmdLine);
 extern void cliFuncPwm(void *cmd, char *cmdLine);
 extern void cliFuncRpm(void *cmd, char *cmdLine);
 extern void cliFuncSet(void *cmd, char *cmdLine);

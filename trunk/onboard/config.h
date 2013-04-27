@@ -19,7 +19,7 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-#define DEFAULT_CONFIG_VERSION		1.486f
+#define DEFAULT_CONFIG_VERSION		1.502f
 #define DEFAULT_STARTUP_MODE		0.0f
 #define DEFAULT_BAUD_RATE		230400
 
@@ -73,6 +73,12 @@
 
 #define DEFAULT_FET_BRAKING		0
 
+#define DEFAULT_SERVO_DUTY		20.0f	    // %
+#define DEFAULT_SERVO_P			0.05f
+#define DEFAULT_SERVO_D			0.0f
+#define DEFAULT_SERVO_MAX_RATE		1000.0f	    // deg/s
+#define DEFAULT_SERVO_SCALE		360.0f	    // deg
+
 #define FLASH_PAGE_SIZE			((uint16_t)0x400)
 #define FLASH_WRITE_ADDR		(0x08000000 + (uint32_t)FLASH_PAGE_SIZE * 63)    // use the last KB for storage
 
@@ -120,6 +126,11 @@ enum configParameters {
     START_STEPS_ACCEL,
     PWM_LOWPASS,
     RPM_MEAS_LP,
+    SERVO_DUTY,
+    SERVO_P,
+    SERVO_D,
+    SERVO_MAX_RATE,
+    SERVO_SCALE,
     CONFIG_NUM_PARAMS
 };
 

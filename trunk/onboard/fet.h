@@ -49,6 +49,23 @@
 #define BH_OFF			(FET_B_H_PIN<<16)
 #define CH_OFF			(FET_C_H_PIN<<16)
 
+
+#define FET_A_L_OFF FET_A_L_PORT->BSRR = AL_OFF
+#define FET_B_L_OFF FET_B_L_PORT->BSRR = BL_OFF
+#define FET_C_L_OFF FET_C_L_PORT->BSRR = CL_OFF
+
+#define FET_A_H_OFF FET_A_H_PORT->BSRR = AH_OFF
+#define FET_B_H_OFF FET_B_H_PORT->BSRR = BH_OFF
+#define FET_C_H_OFF FET_C_H_PORT->BSRR = CH_OFF
+
+#define FET_A_L_ON FET_A_L_PORT->BSRR = AL_ON
+#define FET_B_L_ON FET_B_L_PORT->BSRR = BL_ON
+#define FET_C_L_ON FET_C_L_PORT->BSRR = CL_ON
+
+#define FET_A_H_ON FET_A_H_PORT->BSRR = AH_ON
+#define FET_B_H_ON FET_B_H_PORT->BSRR = BH_ON
+#define FET_C_H_ON FET_C_H_PORT->BSRR = CH_ON
+
 // bit band address turn switch on or off PWM output
 // HI side
 #define AH_BITBAND		((uint32_t *)(0x42000000 + (0x10C00*32) + (27*4)))
@@ -77,6 +94,13 @@
 #define FET_A_L_CHANNEL		CCR2
 #define FET_B_L_CHANNEL		CCR3
 #define FET_C_L_CHANNEL		CCR4
+
+// Servo stuff
+#define FET_DEADTIME		18				    // 36Mhz clock ticks
+#define FET_SERVO_RESOLUTION	1024
+#ifndef M_PI
+#define M_PI			3.14159265f
+#endif
 
 #define FET_MIN_SWITCH_FREQ	4				    // KHz
 #define FET_MAX_SWITCH_FREQ	64				    // KHz
@@ -125,6 +149,7 @@ extern int32_t fetPeriod;
 extern volatile uint32_t fetCommutationMicros;
 extern int8_t fetBrakingEnabled;
 extern int8_t fetBraking;
+extern float servoAngle;
 
 extern void fetInit(void);
 extern uint8_t fetSelfTest(void);
@@ -138,5 +163,8 @@ extern void fetStartCommutation(uint8_t startStep);
 extern void fetSetConstants(void);
 extern void fetSetBraking(int8_t value);
 extern void _fetSetDutyCycle(int32_t dutyCycle);
+extern void fetSetAngleFromPwm(int32_t pwm);
+extern void fetSetAngle(float angle);
+extern void fetUpdateServo(void);
 
 #endif

@@ -13,12 +13,13 @@
     You should have received a copy of the GNU General Public License
     along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright © 2011, 2012  Bill Nesbitt
+    Copyright © 2011, 2012, 2013  Bill Nesbitt
 */
 
 #include "main.h"
 #include "adc.h"
 #include "fet.h"
+#include "run.h"
 #include "digital.h"
 #include "timer.h"
 #include "config.h"
@@ -277,6 +278,9 @@ void DMA1_Channel1_IRQHandler(void) {
 #endif
 
     DMA1->IFCR = DMA1_IT_GL1 | DMA1_IT_TC1 | DMA1_IT_HT1;
+
+    if (runMode == SERVO_MODE)
+	return;
 
     // blanking time after commutation
     if (!fetCommutationMicros || ((currentMicros >= fetCommutationMicros) ? (currentMicros - fetCommutationMicros) : (TIMER_MASK - fetCommutationMicros + currentMicros)) > adcblankingMicros) {

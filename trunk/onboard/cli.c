@@ -49,7 +49,8 @@ const cliCommand_t cliCommandTable[] = {
     {"duty", "<percent>", cliFuncDuty},
     {"help", "", cliFuncHelp},
     {"input", "[PWM | UART | I2C | CAN]", cliFuncInput},
-    {"mode", "[OPEN_LOOP | RPM | THRUST]", cliFuncMode},
+    {"mode", "[OPEN_LOOP | RPM | THRUST | SERVO]", cliFuncMode},
+    {"pos", "<degrees>", cliFuncPos},
     {"pwm", "<microseconds>", cliFuncPwm},
     {"rpm", "<target>", cliFuncRpm},
     {"set", "LIST | [<PARAMETER> <value>]", cliFuncSet},
@@ -81,7 +82,8 @@ const char *cliStates[] = {
 const char *cliRunModes[] = {
     "OPEN_LOOP",
     "RPM",
-    "THRUST"
+    "THRUST",
+    "SERVO"
 };
 
 const char cliHome[] = {0x1b, 0x5b, 0x48, 0x00};
@@ -89,6 +91,7 @@ const char cliClear[] = {0x1b, 0x5b, 0x32, 0x4a, 0x00};
 const char cliClearEOL[] = {0x1b, 0x5b, 0x4b, 0x00};
 const char cliClearEOS[] = {0x1b, 0x5b, 0x4a, 0x00};
 const char *stopError = "ESC must be stopped first\r\n";
+const char *runError = "ESC not running\r\n";
 
 void cliUsage(cliCommand_t *cmd) {
     serialPrint("usage: ");
@@ -111,7 +114,8 @@ void cliFuncArm(void *cmd, char *cmdLine) {
 	serialPrint("ESC already armed\r\n");
     }
     else {
-	cliFuncChangeInput(ESC_INPUT_UART);
+	if (runMode != SERVO_MODE)
+	    cliFuncChangeInput(ESC_INPUT_UART);
 	runArm();
 	serialPrint("ESC armed\r\n");
     }
@@ -194,6 +198,7 @@ void cliFuncConfig(void *cmd, char *cmdLine) {
 
 void cliFuncDisarm(void *cmd, char *cmdLine) {
     runDisarm(REASON_CLI);
+    cliFuncChangeInput(ESC_INPUT_UART);
     serialPrint("ESC disarmed\r\n");
 }
 
@@ -201,7 +206,7 @@ void cliFuncDuty(void *cmd, char *cmdLine) {
     float duty;
 
     if (state < ESC_STATE_RUNNING) {
-	serialPrint("ESC not running\r\n");
+	serialPrint(runError);
     }
     else {
 	if (sscanf(cmdLine, "%f", &duty) != 1) {
@@ -276,11 +281,32 @@ void cliFuncMode(void *cmd, char *cmdLine) {
     }
 }
 
+void cliFuncPos(void *cmd, char *cmdLine) {
+    float angle;
+
+    if (state < ESC_STATE_RUNNING) {
+	serialPrint(runError);
+    }
+    else if (runMode != SERVO_MODE) {
+	serialPrint("Command only valid in servo mode\r\n");
+    }
+    else {
+	if (sscanf(cmdLine, "%f", &angle) != 1) {
+	    cliUsage((cliCommand_t *)cmd);
+	}
+	else {
+	    fetSetAngle(angle);
+	    sprintf(tempBuf, "Position set to %.1f\r\n", angle);
+	    serialPrint(tempBuf);
+	}
+    }
+}
+
 void cliFuncPwm(void *cmd, char *cmdLine) {
     uint16_t pwm;
 
     if (state < ESC_STATE_RUNNING) {
-	serialPrint("ESC not running\r\n");
+	serialPrint(runError);
     }
     else {
 	if (sscanf(cmdLine, "%hu", &pwm) != 1) {
@@ -291,7 +317,8 @@ void cliFuncPwm(void *cmd, char *cmdLine) {
 	    serialPrint(tempBuf);
 	}
 	else {
-	    runMode = OPEN_LOOP;
+	    if (runMode != SERVO_MODE)
+		runMode = OPEN_LOOP;
 	    runNewInput(pwm);
 	    sprintf(tempBuf, "PWM set to %d\r\n", pwm);
 	    serialPrint(tempBuf);
@@ -303,7 +330,7 @@ void cliFuncRpm(void *cmd, char *cmdLine) {
     float target;
 
     if (state < ESC_STATE_RUNNING) {
-	serialPrint("ESC not running\r\n");
+	serialPrint(runError);
     }
     else {
 	if (sscanf(cmdLine, "%f", &target) != 1) {
@@ -442,7 +469,7 @@ void cliFuncStatus(void *cmd, char *cmdLine) {
 
 void cliFuncStop(void *cmd, char *cmdLine) {
     if (state < ESC_STATE_NOCOMM) {
-	serialPrint("ESC not running\r\n");
+	serialPrint(runError);
     }
     else {
 	runStop();

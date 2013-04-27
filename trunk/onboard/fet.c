@@ -26,6 +26,7 @@
 #include "stm32f10x_dbgmcu.h"
 #include "stm32f10x_iwdg.h"
 #include "misc.h"
+#include <math.h>
 
 /*
                -----------------------------------------------
@@ -69,22 +70,93 @@ int8_t fetBrakingEnabled;
 int8_t fetBraking;
 int16_t startSeqCnt;
 int8_t  startSeqStp;
+float fetServoAngle;
+float fetServoMaxRate;
 
-#define FET_A_L_OFF FET_A_L_PORT->BSRR = AL_OFF
-#define FET_B_L_OFF FET_B_L_PORT->BSRR = BL_OFF
-#define FET_C_L_OFF FET_C_L_PORT->BSRR = CL_OFF
+int16_t fetSine[FET_SERVO_RESOLUTION];
 
-#define FET_A_H_OFF FET_A_H_PORT->BSRR = AH_OFF
-#define FET_B_H_OFF FET_B_H_PORT->BSRR = BH_OFF
-#define FET_C_H_OFF FET_C_H_PORT->BSRR = CH_OFF
+void fetCreateSine(void) {
+    float a;
+    int i;
 
-#define FET_A_L_ON FET_A_L_PORT->BSRR = AL_ON
-#define FET_B_L_ON FET_B_L_PORT->BSRR = BL_ON
-#define FET_C_L_ON FET_C_L_PORT->BSRR = CL_ON
+    for (i = 0; i < FET_SERVO_RESOLUTION; i++) {
+	a = M_PI * 2.0f * i / FET_SERVO_RESOLUTION;
+	fetSine[i] = sinf(a) * (float)fetPeriod / 2.0f;
+    }
+}
 
-#define FET_A_H_ON FET_A_H_PORT->BSRR = AH_ON
-#define FET_B_H_ON FET_B_H_PORT->BSRR = BH_ON
-#define FET_C_H_ON FET_C_H_PORT->BSRR = CH_ON
+void _fetSetServoDuty(uint16_t duty[3]) {
+    FET_H_TIMER->FET_A_H_CHANNEL = duty[0];
+    FET_H_TIMER->FET_B_H_CHANNEL = duty[1];
+    FET_H_TIMER->FET_C_H_CHANNEL = duty[2];
+
+    FET_MASTER_TIMER->FET_A_L_CHANNEL = duty[0] + FET_DEADTIME;
+    FET_MASTER_TIMER->FET_B_L_CHANNEL = duty[1] + FET_DEADTIME;
+    FET_MASTER_TIMER->FET_C_L_CHANNEL = duty[2] + FET_DEADTIME;
+}
+
+void fetUpdateServo(void) {
+    static float myAngle = 0.0f;
+    static float servoDState = 0.0f;
+    float a, e;
+
+    uint16_t pwm[3];
+    int index;
+
+    if (state == ESC_STATE_RUNNING) {
+	*AL_BITBAND = 1;
+	*BL_BITBAND = 1;
+	*CL_BITBAND = 1;
+
+	*AH_BITBAND = 1;
+	*BH_BITBAND = 1;
+	*CH_BITBAND = 1;
+
+	e = (fetServoAngle - myAngle);
+	a = e * p[SERVO_P];
+	if (a > fetServoMaxRate)
+	    a = fetServoMaxRate;
+	else if (a < -fetServoMaxRate)
+	    a = -fetServoMaxRate;
+
+	myAngle += a;
+
+	myAngle += (a - servoDState) * p[SERVO_D];
+	servoDState = a;
+
+	index = ((float)FET_SERVO_RESOLUTION * myAngle / 360.0f);
+	while (index < 0)
+	    index += FET_SERVO_RESOLUTION;
+	index = index % FET_SERVO_RESOLUTION;
+
+	pwm[0] = fetPeriod/2 + fetSine[index] * p[SERVO_DUTY] / 100;
+
+	index = ((index + FET_SERVO_RESOLUTION / 3) % FET_SERVO_RESOLUTION);
+	pwm[1] = fetPeriod/2 + fetSine[index] * p[SERVO_DUTY] / 100;
+
+	index = ((index + FET_SERVO_RESOLUTION / 3) % FET_SERVO_RESOLUTION);
+	pwm[2] = fetPeriod/2 + fetSine[index] * p[SERVO_DUTY] / 100;
+
+	_fetSetServoDuty(pwm);
+    }
+    else {
+	*AL_BITBAND = 0;
+	*BL_BITBAND = 0;
+	*CL_BITBAND = 0;
+
+	*AH_BITBAND = 0;
+	*BH_BITBAND = 0;
+	*CH_BITBAND = 0;
+    }
+}
+
+void fetSetAngleFromPwm(int32_t pwm) {
+    fetServoAngle = pwm * p[SERVO_SCALE] * p[MOTOR_POLES] * 0.5f / fetPeriod;
+}
+
+void fetSetAngle(float angle) {
+    fetServoAngle = angle * p[MOTOR_POLES] * 0.5f;
+}
 
 #define FET_TEST_DELAY	1000
 
@@ -260,9 +332,12 @@ void fetBeep(uint16_t freq, uint16_t duration) {
 void fetSetBraking(int8_t value) {
     if (value) {
 	// set low side for inverted PWM
-	*AL_BITBAND = AH[fetStep];
-	*BL_BITBAND = BH[fetStep];
-	*CL_BITBAND = CH[fetStep];
+//	*AL_BITBAND = AH[fetStep];
+//	*BL_BITBAND = BH[fetStep];
+//	*CL_BITBAND = CH[fetStep];
+	*AL_BITBAND = 1;
+	*BL_BITBAND = 1;
+	*CL_BITBAND = 1;
 	fetBraking = 1;
     }
     else {
@@ -282,9 +357,6 @@ void _fetSetDutyCycle(int32_t dutyCycle) {
     if (state == ESC_STATE_DISARMED)
 	tmp = 0;
 
-    // invert
-    tmp = fetPeriod - tmp;
-
     FET_H_TIMER->FET_A_H_CHANNEL = tmp;
     FET_H_TIMER->FET_B_H_CHANNEL = tmp;
     FET_H_TIMER->FET_C_H_CHANNEL = tmp;
@@ -296,9 +368,6 @@ void _fetSetDutyCycle(int32_t dutyCycle) {
 	    tmp = 0;
 	else if (tmp > fetPeriod)
 	    tmp = fetPeriod;
-
-	// invert
-	tmp = fetPeriod - tmp;
 
 	FET_MASTER_TIMER->FET_A_L_CHANNEL = tmp;
 	FET_MASTER_TIMER->FET_B_L_CHANNEL = tmp;
@@ -349,7 +418,7 @@ void fetSetBaseTime(int32_t period) {
 
     TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
     TIM_TimeBaseStructure.TIM_Prescaler = 1;                      // 36Mhz
-    TIM_TimeBaseStructure.TIM_Period = period;
+    TIM_TimeBaseStructure.TIM_Period = period-1;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_CenterAligned1;
     TIM_TimeBaseInit(FET_MASTER_TIMER, &TIM_TimeBaseStructure);
 
@@ -358,6 +427,10 @@ void fetSetBaseTime(int32_t period) {
     TIM_TimeBaseStructure.TIM_Period = period-1;
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_CenterAligned1;
     TIM_TimeBaseInit(FET_H_TIMER, &TIM_TimeBaseStructure);
+
+    // sync clocks
+    FET_H_TIMER->CNT = 0;
+    FET_MASTER_TIMER->CNT = 0;
 }
 
 void fetInit(void) {
@@ -410,40 +483,18 @@ void fetInit(void) {
     FET_B_H_PORT->BSRR = BH_OFF;
     FET_C_H_PORT->BSRR = CH_OFF;
 
-    // First, setup a MASTER timer to control the FET PWM timer (slave).
-    // This is done so that FET PWM output will stop with the outputs in
-    // a safe state if the controller is stopped for debugging.
-    // So, each MASTER timer rising edge triggers a one pulse output of the PWM timer.
-    // The MASTER timer stops at core halt, but the PWM timer does not, completing its
-    // cycle and ending up in a safe (inactive) state.
-    // The MASTER timer is also used for inverted PWM on the LO side for FET braking
-
     // allow FET PWM (slave) to run during core halt
-    DBGMCU_Config(FET_DBGMCU_STOP, DISABLE);
+    DBGMCU_Config(FET_DBGMCU_STOP, ENABLE);
 
     // stop MASTER during core halt
     DBGMCU_Config(FET_MASTER_DBGMCU_STOP, ENABLE);
-
-    TIM_OCStructInit(&TIM_OCInitStructure);
-    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
-    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-    TIM_OCInitStructure.TIM_Pulse = (fetPeriod-1) / 2;   // 50% duty cycle
-    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
-    TIM_OC1Init(FET_MASTER_TIMER, &TIM_OCInitStructure);
-    TIM_OC1PreloadConfig(FET_MASTER_TIMER, TIM_OCPreload_Enable);
-
-    // Select the Master Slave Mode
-    TIM_SelectMasterSlaveMode(FET_MASTER_TIMER, TIM_MasterSlaveMode_Enable);
-
-    // Master Mode selection
-    TIM_SelectOutputTrigger(FET_MASTER_TIMER, TIM_TRGOSource_Update);
 
     // setup LO side inverted PWM for FET braking (if enabled)
     TIM_OCStructInit(&TIM_OCInitStructure);
     TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
     TIM_OCInitStructure.TIM_Pulse = fetDutyCycle;
-    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
 
     // Phase A
     TIM_OC2Init(FET_MASTER_TIMER, &TIM_OCInitStructure);
@@ -459,8 +510,6 @@ void fetInit(void) {
 
     TIM_ARRPreloadConfig(FET_MASTER_TIMER, ENABLE);
 
-    TIM_Cmd(FET_MASTER_TIMER, ENABLE);
-
     // now setup the FET driver PWM timer (slave)
     FET_H_TIMER_REMAP;
 
@@ -468,7 +517,7 @@ void fetInit(void) {
     TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
     TIM_OCInitStructure.TIM_Pulse = fetDutyCycle;
-    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
+    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
 
     // Phase A
     TIM_OC1Init(FET_H_TIMER, &TIM_OCInitStructure);
@@ -484,14 +533,11 @@ void fetInit(void) {
 
     TIM_ARRPreloadConfig(FET_H_TIMER, ENABLE);
 
-    // Slave Mode selection
-    TIM_SelectSlaveMode(FET_H_TIMER, TIM_SlaveMode_Trigger);
-    // set the slave's master
-    TIM_SelectInputTrigger(FET_H_TIMER, FET_H_TIMER_MASTER);
-
-    TIM_SelectOnePulseMode(FET_H_TIMER, TIM_OPMode_Single);
-
     TIM_Cmd(FET_H_TIMER, ENABLE);
+    TIM_Cmd(FET_MASTER_TIMER, ENABLE);
+
+    FET_H_TIMER->CNT = 0;
+    FET_MASTER_TIMER->CNT = 0;
 
     // now set AF mode for the high side gates
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -695,6 +741,7 @@ void fetSetConstants(void) {
     float startDetects = p[GOOD_DETECTS_START];
     float disarmDetects = p[BAD_DETECTS_DISARM];
     float fetBraking = p[FET_BRAKING];
+    float servoMaxRate = p[SERVO_MAX_RATE];
 
     // bounds checking
     if (switchFreq > FET_MAX_SWITCH_FREQ)
@@ -722,6 +769,9 @@ void fetSetConstants(void) {
     else
 	fetBraking = 0.0f;
 
+    if (servoMaxRate <= 0.0f)
+	servoMaxRate = 360.0f;
+
     fetSwitchFreq = switchFreq * 1000 * 2;
     fetPeriod = FET_AHB_FREQ/fetSwitchFreq;     // bus speed / switching frequency - depends on fetSwitchFreq
     fetSetBaseTime(fetPeriod);
@@ -729,10 +779,14 @@ void fetSetConstants(void) {
     fetStartDetects = startDetects;
     fetDisarmDetects = disarmDetects;
     fetBrakingEnabled = (int8_t)fetBraking;
+    fetServoMaxRate = servoMaxRate / 1000.0f * p[MOTOR_POLES] * 0.5f;
 
     p[SWITCH_FREQ] = switchFreq;
     p[START_VOLTAGE] = startVoltage;
     p[GOOD_DETECTS_START] = startDetects;
     p[BAD_DETECTS_DISARM] = disarmDetects;
     p[FET_BRAKING] = fetBraking;
+    p[SERVO_MAX_RATE] = servoMaxRate;
+
+    fetCreateSine();
 }
