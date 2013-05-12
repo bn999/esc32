@@ -110,6 +110,8 @@ void runDisarm(int reason) {
 }
 
 void runArm(void) {
+    int i;
+
     fetSetDutyCycle(0);
     timerCancelAlarm2();
     digitalHi(errorLed);
@@ -125,7 +127,13 @@ void runArm(void) {
 	fetSetBraking(0);
     }
 
-    fetBeep(150, 800);
+    // extra beeps signifying run mode
+    for (i = 0; i < runMode + 1; i++) {
+	fetBeep(250, 600);
+	timerDelay(10000);
+    }
+
+//    fetBeep(150, 800);
 }
 
 void runStart(void) {
