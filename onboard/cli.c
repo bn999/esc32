@@ -239,7 +239,7 @@ void cliFuncInput(void *cmd, char *cmdLine) {
     char mode[sizeof cliInputModes[0]];
     int i;
 
-    if (sscanf(cmdLine, "%7s", &mode) != 1) {
+    if (sscanf(cmdLine, "%7s", mode) != 1) {
 	cliUsage((cliCommand_t *)cmd);
     }
     else {
@@ -261,7 +261,7 @@ void cliFuncMode(void *cmd, char *cmdLine) {
     char mode[sizeof cliRunModes[0]];
     int i;
 
-    if (sscanf(cmdLine, "%10s", &mode) != 1) {
+    if (sscanf(cmdLine, "%10s", mode) != 1) {
 	cliUsage((cliCommand_t *)cmd);
     }
     else {
@@ -366,7 +366,6 @@ void cliPrintParam(int i) {
 
 void cliFuncSet(void *cmd, char *cmdLine) {
     char param[32];
-    const char *format = "%-20s = ";
     float value;
     int i;
 
@@ -523,10 +522,7 @@ void cliPrompt(void) {
 }
 
 void cliCheck(void) {
-    cliCommand_t *cmd;
-
-//    sprintf(tempBuf, "%f\r\n", rpm);
-//    serialPrint(tempBuf);
+    cliCommand_t *cmd = NULL;
 
     if (cliTelemetry && !(runMilis % cliTelemetry)) {
 	serialPrint(cliHome);
