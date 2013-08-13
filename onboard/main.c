@@ -39,6 +39,8 @@ volatile uint8_t state, inputMode;
 char buf[64];
 
 void main(void) {
+    rccInit();
+
     statusLed = digitalInit(GPIO_STATUS_LED_PORT, GPIO_STATUS_LED_PIN);
     errorLed = digitalInit(GPIO_ERROR_LED_PORT, GPIO_ERROR_LED_PIN);
 #ifdef ESC_DEBUG
@@ -46,7 +48,6 @@ void main(void) {
     digitalLo(tp);
 #endif
 
-    rccInit();
     timerInit();
     configInit();
     adcInit();
