@@ -110,7 +110,7 @@ void adcInit(void) {
 
     // Enable the DMA1_Channel1 global Interrupt
     NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -198,7 +198,7 @@ void adcSetCrossingPeriod(int32_t crossPer) {
     crossingPeriod = crossPer;
 }
 
-void adcGrowHist(void) {
+static inline void adcGrowHist(void) {
     register int i;
 
     avgA += histA[histIndex];
@@ -214,7 +214,7 @@ void adcGrowHist(void) {
     histSize++;
 }
 
-void adcShrinkHist(void) {
+static inline void adcShrinkHist(void) {
     register int i;
 
     for (i = histIndex; i < histSize-1; i++) {
@@ -233,7 +233,7 @@ void adcShrinkHist(void) {
     avgC -= histC[histIndex];
 }
 
-void adcEvaluateHistSize(void) {
+static inline void adcEvaluateHistSize(void) {
     int16_t sizeNeeded;
 
 //  sizeNeeded = crossingPeriod/16/TIMER_MULT;
@@ -241,7 +241,6 @@ void adcEvaluateHistSize(void) {
 //  sizeNeeded = crossingPeriod/24/TIMER_MULT;
     sizeNeeded = crossingPeriod/32/TIMER_MULT;
 
-//    if (sizeNeeded > (histSize+1) && histSize < ADC_HIST_SIZE)
     if (sizeNeeded > (histSize+1) && histSize < ADC_HIST_SIZE)
 	adcGrowHist();
     else if (sizeNeeded < (histSize-1) && sizeNeeded > 1)
@@ -299,41 +298,55 @@ void DMA1_Channel1_IRQHandler(void) {
 	avgB += valB - histB[histIndex];
 	avgC += valC - histC[histIndex];
 
-	if ((avgA+avgB+avgC)/histSize > (ADC_MIN_COMP*3) && state != ESC_STATE_DISARMED && state != ESC_STATE_NOCOMM) {
+	if ((avgA+avgB+avgC)/histSize > (ADC_MIN_COMP*3) && state != ESC_STATE_DISARMED) {
 	    register int32_t periodMicros;
 
 	    periodMicros = (currentMicros >= detectedCrossing) ? (currentMicros - detectedCrossing) : (TIMER_MASK - detectedCrossing + currentMicros);
 
 	    if (periodMicros > nextCrossingDetect) {
-		register uint8_t nextStep = 0;
+		register int8_t nextStep = 0;
 
 		if (!adcStateA && avgA >= (avgB+avgC)>>1) {
 		    adcStateA = 1;
-		    nextStep = 6;
+		    if (fetStepDir > 0)
+			nextStep = 6;
+		    else
+			nextStep = 1;
 		}
 		else if (adcStateA && avgA <= (avgB+avgC)>>1) {
 		    adcStateA = 0;
-		    nextStep = 3;
+		    if (fetStepDir > 0)
+			nextStep = 3;
+		    else
+			nextStep = 4;
 		}
 		else if (!adcStateB && avgB >= (avgA+avgC)>>1) {
 		    adcStateB = 1;
-		    nextStep = 4;
+		    if (fetStepDir > 0)
+			nextStep = 4;
+		    else
+			nextStep = 5;
 		}
 		else if (adcStateB && avgB <= (avgA+avgC)>>1) {
 		    adcStateB = 0;
-		    nextStep = 1;
-
-#ifdef ESC_DEBUG
-	digitalTogg(tp);
-#endif
+		    if (fetStepDir > 0)
+			nextStep = 1;
+		    else
+			nextStep = 2;
 		}
 		else if (!adcStateC && avgC >= (avgA+avgB)>>1) {
 		    adcStateC = 1;
-		    nextStep = 2;
+		    if (fetStepDir > 0)
+			nextStep = 2;
+		    else
+			nextStep = 3;
 		}
 		else if (adcStateC && avgC <= (avgA+avgB)>>1) {
 		    adcStateC = 0;
-		    nextStep = 5;
+		    if (fetStepDir > 0)
+			nextStep = 5;
+		    else
+			nextStep = 6;
 		}
 
 		if (nextStep && periodMicros > adcMinPeriod) {

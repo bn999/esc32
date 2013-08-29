@@ -27,6 +27,7 @@
 #include "config.h"
 #include "rcc.h"
 #include "timer.h"
+#include "can.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -463,6 +464,8 @@ void cliFuncStatus(void *cmd, char *cmdLine) {
 #ifdef ESC_DEBUG
     sprintf(tempBuf, formatInt, "DISARM CODE", disarmReason);
     serialPrint(tempBuf);
+    sprintf(tempBuf, formatInt, "CAN NET ID", canData.networkId);
+    serialPrint(tempBuf);
 #endif
 }
 
@@ -488,7 +491,7 @@ void cliFuncTelemetry(void *cmd, char *cmdLine) {
     }
     else {
 	if (freq > 0) {
-	    cliTelemetry = 1000/freq;
+	    cliTelemetry = RUN_FREQ/freq;
 	    serialPrint(cliHome);
 	    serialPrint(cliClear);
 	    serialWrite('\n');
@@ -524,9 +527,11 @@ void cliPrompt(void) {
 void cliCheck(void) {
     cliCommand_t *cmd = NULL;
 
-    if (cliTelemetry && !(runMilis % cliTelemetry)) {
+    if (cliTelemetry && !(runCount % cliTelemetry)) {
+	maxAmps = (adcMaxAmps - adcAmpsOffset) * adcToAmps;
+
 	serialPrint(cliHome);
-	sprintf(tempBuf, "Telemetry @ %d Hz\r\n\n", 1000/cliTelemetry);
+	sprintf(tempBuf, "Telemetry @ %d Hz\r\n\n", RUN_FREQ/cliTelemetry);
 	serialPrint(tempBuf);
 	cliFuncStatus(cmd, "");
 	serialPrint("\n> ");

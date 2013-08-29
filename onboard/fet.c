@@ -61,7 +61,7 @@ int32_t fetPeriod;
 int32_t fetActualDutyCycle;
 volatile int32_t fetDutyCycle;
 volatile uint8_t fetStep;
-volatile uint8_t fetNextStep;
+volatile int8_t fetNextStep;
 volatile uint32_t fetGoodDetects;
 volatile uint32_t fetBadDetects;
 volatile uint32_t fetTotalBadDetects;
@@ -70,6 +70,7 @@ int8_t fetBrakingEnabled;
 int8_t fetBraking;
 int16_t startSeqCnt;
 int8_t  startSeqStp;
+int8_t fetStepDir;
 float fetServoAngle;
 float fetServoMaxRate;
 
@@ -397,9 +398,11 @@ void fetSetStep(int n) {
     fetCommutationMicros = timerGetMicros();
     __asm volatile ("cpsie i");
 
-    fetNextStep = n + 1;
+    fetNextStep = n + fetStepDir;
     if (fetNextStep > 6)
 	fetNextStep = 1;
+    else if (fetNextStep < 1)
+	fetNextStep = 6;
 
     // set high side
     *AH_BITBAND = AH[n];
@@ -579,28 +582,34 @@ void fetMissedCommutate(int period) {
 }
 
 void fetCommutate(int period) {
-    // keep count of in order ZC detections
-    if (fetStep == fetNextStep) {
-	timerCancelAlarm2();
+    if (state != ESC_STATE_NOCOMM) {
+	// keep count of in order ZC detections
+	if (fetStep == fetNextStep) {
+	    timerCancelAlarm2();
 
-	// commutate
-	fetSetStep(fetStep);
+	    // commutate
+	    fetSetStep(fetStep);
 
-	fetGoodDetects++;
-	if (fetGoodDetects >= 6)
-	    fetBadDetects = 0;
+	    fetGoodDetects++;
+	    if (fetGoodDetects >= 6)
+		fetBadDetects = 0;
 
-	// in case of missed zc
-	if (state == ESC_STATE_RUNNING)
-	    timerSetAlarm2(period + period/2, fetMissedCommutate, period);
-	else if (state == ESC_STATE_STARTING)
-//	    timerSetAlarm2(period*2, fetMissedCommutate, period*2);
-	    timerSetAlarm2(period + period/2, fetMissedCommutate, period);
+	    // in case of missed zc
+	    if (state == ESC_STATE_RUNNING)
+		timerSetAlarm2(period + period/2, fetMissedCommutate, period);
+	    else if (state == ESC_STATE_STARTING)
+//		timerSetAlarm2(period*2, fetMissedCommutate, period*2);
+		timerSetAlarm2(period + period/2, fetMissedCommutate, period);
+	}
+	else {
+	    fetBadDetects++;
+	    fetTotalBadDetects++;
+	    fetGoodDetects = 0;
+	}
     }
+    // keep up with ZC's
     else {
-	fetBadDetects++;
-	fetTotalBadDetects++;
-	fetGoodDetects = 0;
+	fetStep = fetNextStep;
     }
 }
 
@@ -661,9 +670,13 @@ void motorStartSeq(int period) {
 	    period = p[START_STEPS_PERIOD];
 
 	// Set next step
-	startSeqStp++;
-	if (startSeqStp > 6) startSeqStp = 1;
-	    fetSetStep(startSeqStp);
+	startSeqStp += fetStepDir;
+	if (startSeqStp > 6)
+	    startSeqStp = 1;
+	else if (startSeqStp < 1)
+	    startSeqStp = 6;
+
+	fetSetStep(startSeqStp);
 
 	// Set PWM
 	fetStartDuty = p[START_VOLTAGE] / avgVolts * fetPeriod;
@@ -676,18 +689,29 @@ void motorStartSeq(int period) {
 	    nextPeriod = p[MIN_PERIOD]; // avoid negative period
 	timerSetAlarm2(period, motorStartSeq, nextPeriod);
     }
-    // Continue normal startup with commutation
     else {
 	// allow commutation
 	state = ESC_STATE_STARTING;
 
-	// Count next step (for commutation)
-	startSeqStp++;
-	if (startSeqStp > 6)
-	    startSeqStp = 1;
+	// let motor run
+	if (p[START_STEPS_NUM]) {
+	    adcMaxAmps = 0;
+	    fetGoodDetects = 0;
+	    fetBadDetects = 0;
+	    fetTotalBadDetects = 0;
+	}
+	// Continue normal startup with commutation
+	else {
+	    // Count next step (for commutation)
+	    startSeqStp += fetStepDir;
+	    if (startSeqStp > 6)
+		startSeqStp = 1;
+	    else if (startSeqStp < 1)
+		startSeqStp = 6;
 
-	// start
-	fetStartCommutation(startSeqStp);
+	    // start
+	    fetStartCommutation(startSeqStp);
+	}
     }
 
     // count up step of startup sequence
@@ -781,7 +805,12 @@ void fetSetConstants(void) {
     fetStartDetects = startDetects;
     fetDisarmDetects = disarmDetects;
     fetBrakingEnabled = (int8_t)fetBraking;
-    fetServoMaxRate = servoMaxRate / 1000.0f * p[MOTOR_POLES] * 0.5f;
+    fetServoMaxRate = servoMaxRate / RUN_FREQ * p[MOTOR_POLES] * 0.5f;
+
+    if (p[DIRECTION] >= 0)
+	fetStepDir = 1;
+    else
+	fetStepDir = -1;
 
     p[SWITCH_FREQ] = switchFreq;
     p[START_VOLTAGE] = startVoltage;
@@ -789,6 +818,7 @@ void fetSetConstants(void) {
     p[BAD_DETECTS_DISARM] = disarmDetects;
     p[FET_BRAKING] = fetBraking;
     p[SERVO_MAX_RATE] = servoMaxRate;
+    p[DIRECTION] = fetStepDir;
 
     fetCreateSine();
 }

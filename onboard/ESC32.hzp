@@ -31,6 +31,8 @@
       <file file_name="binary.c"/>
       <file file_name="ow.c"/>
       <file file_name="ow.h"/>
+      <file file_name="can.h"/>
+      <file file_name="can.c"/>
     </folder>
     <folder Name="System Files">
       <file file_name="$(StudioDir)/source/thumb_crt0.s"/>
@@ -45,7 +47,7 @@
       </file>
     </folder>
     <folder Name="STM32 Drivers" file_name="">
-      <folder Name="inc">
+      <folder Name="inc" file_name="">
         <file file_name="stm32f10x_gpio.h"/>
         <file file_name="stm32f10x_rcc.h"/>
         <file file_name="stm32f10x_conf.h"/>
@@ -60,8 +62,9 @@
         <file file_name="stm32f10x_pwr.h"/>
         <file file_name="stm32f10x_flash.h"/>
         <file file_name="stm32f10x_iwdg.h"/>
+        <file file_name="stm32f10x_can.h"/>
       </folder>
-      <folder Name="src">
+      <folder Name="src" file_name="">
         <file file_name="stm32f10x_gpio.c"/>
         <file file_name="stm32f10x_rcc.c"/>
         <file file_name="system_stm32f10x.c"/>
@@ -75,11 +78,12 @@
         <file file_name="stm32f10x_pwr.c"/>
         <file file_name="stm32f10x_flash.c"/>
         <file file_name="stm32f10x_iwdg.c"/>
+        <file file_name="stm32f10x_can.c"/>
       </folder>
       <file file_name="core_cm3.h"/>
     </folder>
     <configuration Name="Debug" gcc_optimization_level="Level 1"/>
-    <configuration Name="Release" c_preprocessor_definitions="STARTUP_FROM_RESET" gcc_optimization_level="Level 1"/>
+    <configuration Name="Release" c_preprocessor_definitions="STARTUP_FROM_RESET" gcc_debugging_level="Level 3" gcc_optimization_level="Level 1"/>
   </project>
   <configuration Name="THUMB Debug" inherited_configurations="THUMB;Debug"/>
   <configuration Name="THUMB" Platform="ARM" arm_instruction_set="THUMB" arm_library_instruction_set="THUMB" c_preprocessor_definitions="__THUMB" hidden="Yes"/>

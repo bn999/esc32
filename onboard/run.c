@@ -24,6 +24,7 @@
 #include "pwm.h"
 #include "cli.h"
 #include "binary.h"
+#include "can.h"
 #include "config.h"
 #include "misc.h"
 #include "stm32f10x_exti.h"
@@ -32,7 +33,7 @@
 #include "stm32f10x_dbgmcu.h"
 #include <math.h>
 
-uint32_t runMilis;
+volatile uint32_t runCount;
 uint32_t oldIdleCounter;
 float idlePercent;
 float avgAmps, maxAmps;
@@ -40,12 +41,15 @@ float avgVolts;
 float rpm;
 float targetRpm;
 float rpmI;
+float rpmPTerm, rpmITerm;
 float runRPMFactor;
+float runRpmLPF;
 float maxCurrentSQRT;
 uint8_t disarmReason;
 uint8_t commandMode;
 uint8_t runArmCount;
 volatile uint8_t runMode;
+uint8_t escId;
 float maxThrust;
 
 void runFeedIWDG(void) {
@@ -129,11 +133,9 @@ void runArm(void) {
 
     // extra beeps signifying run mode
     for (i = 0; i < runMode + 1; i++) {
-	fetBeep(250, 600);
+	fetBeep(150, 600);
 	timerDelay(10000);
     }
-
-//    fetBeep(150, 800);
 }
 
 void runStart(void) {
@@ -165,6 +167,15 @@ uint8_t runDuty(float duty) {
     }
 
     return ret;
+}
+
+// 0 => 2^16
+void runSetpoint(uint16_t val) {
+    uint32_t duty;
+
+    duty = fetPeriod * val / ((1<<16)-1);
+
+    fetSetDutyCycle(duty);
 }
 
 void runNewInput(uint16_t setpoint) {
@@ -233,7 +244,7 @@ void runNewInput(uint16_t setpoint) {
     }
 }
 
-void runWatchDog(void) {
+static inline void runWatchDog(void) {
     register uint32_t t, d, p;
 
     __asm volatile ("cpsid i");
@@ -274,7 +285,7 @@ void runWatchDog(void) {
 	    adcAmpsOffset = adcAvgAmps;	// record current amperage offset
 	}
     }
-    else if (state == ESC_STATE_DISARMED && !(runMilis % 100)) {
+    else if (state == ESC_STATE_DISARMED && !(runCount % (RUN_FREQ/10))) {
 	adcAmpsOffset = adcAvgAmps;	// record current amperage offset
 	digitalTogg(errorLed);
     }
@@ -284,7 +295,7 @@ void runRpmPIDReset(void) {
     rpmI = 0.0f;
 }
 
-int32_t runRpmPID(float rpm, float target) {
+static inline int32_t runRpmPID(float rpm, float target) {
     float error;
     float ff, rpmP, rpmD;
     float iTerm = rpmI;
@@ -299,12 +310,12 @@ int32_t runRpmPID(float rpm, float target) {
 	error = 1000.0f;
 
     if (error > 0.0f) {
-	rpmP = error * p[PTERM];
-	rpmI += error * p[ITERM];
+	rpmP =  error * rpmPTerm;
+	rpmI += error * rpmITerm;
     }
     else {
-	rpmP =  error * p[PTERM] * p[PNFAC];
-	rpmI += error * p[ITERM] * p[INFAC];
+	rpmP =  error * rpmPTerm * p[PNFAC];
+	rpmI += error * rpmITerm * p[INFAC];
     }
 
     if (fetBrakingEnabled) {
@@ -328,26 +339,24 @@ int32_t runRpmPID(float rpm, float target) {
     return output;
 }
 
-uint8_t runRpm(void) {
+static inline uint8_t runRpm(void) {
     if (state > ESC_STATE_STARTING) {
 //	rpm = rpm * 0.90f + (runRPMFactor / (float)crossingPeriod) * 0.10f;
 //	rpm -= (rpm - (runRPMFactor / (float)crossingPeriod)) * 0.25f;
 //	rpm = (rpm + (runRPMFactor / (float)crossingPeriod)) * 0.5f;
 //	rpm = (rpm + ((32768.0f * runRPMFactor) / (float)adcCrossingPeriod)) * 0.5f; // increased resolution, fixed filter here
-	rpm = p[RPM_MEAS_LP] * rpm + ((32768.0f * runRPMFactor) / (float)adcCrossingPeriod) * (1.0f - p[RPM_MEAS_LP]); // increased resolution, variable filter here
+	rpm = runRpmLPF * rpm + ((32768.0f * runRPMFactor) / (float)adcCrossingPeriod) * (1.0f - runRpmLPF); // increased resolution, variable filter here
 
 	// run closed loop control
 	if (runMode == CLOSED_LOOP_RPM) {
 	    fetSetDutyCycle(runRpmPID(rpm, targetRpm));
 	    return 1;
 	}
-
 	// run closed loop control also for THRUST mode
 	else if (runMode == CLOSED_LOOP_THRUST) {
 	    fetSetDutyCycle(runRpmPID(rpm, targetRpm));
 	    return 1;
 	}
-
 	else {
 	    return 0;
 	}
@@ -389,20 +398,20 @@ void runInit(void) {
     runSetConstants();
     runMode = p[STARTUP_MODE];
 
-    SysTick_Config(SystemCoreClock / 1000); // 1ms
+    SysTick_Config(SystemCoreClock / RUN_FREQ);
     NVIC_SetPriority(SysTick_IRQn, 2);	    // lower priority
 
     // setup hardware watchdog
     runIWDGInit(20);
 }
 
-#define RUN_CURRENT_ITERM	1.0f
+#define RUN_CURRENT_ITERM	(1.0f * 1000.0f / RUN_FREQ)
 #define RUN_CURRENT_PTERM	10.0f
 #define RUN_MAX_DUTY_INCREASE	1.0f
 
 float currentIState;
 
-int32_t runCurrentPID(int32_t duty) {
+static inline int32_t runCurrentPID(int32_t duty) {
     float error;
     float pTerm, iTerm;
     float out;
@@ -426,7 +435,7 @@ int32_t runCurrentPID(int32_t duty) {
     return duty;
 }
 
-void runThrotLim(int32_t duty) {
+static inline  void runThrotLim(int32_t duty) {
     float maxVolts;
     int32_t maxDuty;
 
@@ -463,7 +472,6 @@ void SysTick_Handler(void) {
 
     avgVolts = adcAvgVolts * ADC_TO_VOLTS;
     avgAmps = (adcAvgAmps - adcAmpsOffset) * adcToAmps;
-    maxAmps = (adcMaxAmps - adcAmpsOffset) * adcToAmps;
 
     if (runMode == SERVO_MODE) {
 	fetUpdateServo();
@@ -476,16 +484,15 @@ void SysTick_Handler(void) {
 	runThrotLim(fetDutyCycle);
     }
 
-    idlePercent = 100.0f * (idleCounter-oldIdleCounter) * minCycles / totalCycles;
-    oldIdleCounter = idleCounter;
-    totalCycles = 0;
+    if (!(runCount % (10 * 1000 / RUN_FREQ))) {
+	idlePercent = 100.0f * (idleCounter-oldIdleCounter) / (SystemCoreClock * 10 / RUN_FREQ / minCycles);
+	oldIdleCounter = idleCounter;
+	totalCycles = 0;
+    }
 
-    if (commandMode == CLI_MODE)
-	cliCheck();
-    else
-	binaryCheck();
+    canProcess();
 
-    runMilis++;
+    runCount++;
 }
 
 void PVD_IRQHandler(void) {
@@ -505,6 +512,7 @@ void PVD_IRQHandler(void) {
 void runSetConstants(void) {
     int32_t startupMode = (int)p[STARTUP_MODE];
     float maxCurrent = p[MAX_CURRENT];
+    uint8_t escId = (uint8_t)p[ESC_ID];
 
     if (startupMode < 0 || startupMode >= NUM_RUN_MODES)
 	startupMode = 0;
@@ -520,8 +528,13 @@ void runSetConstants(void) {
     p[MOTOR_POLES] = (int)p[MOTOR_POLES];
     p[STARTUP_MODE] = startupMode;
     p[MAX_CURRENT] = maxCurrent;
+    p[ESC_ID] = escId;
 
     // Calculate MAX_THRUST from PWM_RPM_SCALE (which is MAX_RPM) and THRxTERMs
     // Based on "thrust = rpm * a1 + rpm^2 * a2"
     maxThrust = p[PWM_RPM_SCALE] * p[THR1TERM] + p[PWM_RPM_SCALE] * p[PWM_RPM_SCALE] * p[THR2TERM];
+
+    rpmPTerm = p[PTERM];
+    rpmITerm = p[ITERM] * 1000.0f / RUN_FREQ;
+    runRpmLPF = p[RPM_MEAS_LP] * 1000.0f / RUN_FREQ;
 }

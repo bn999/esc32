@@ -98,19 +98,19 @@ void serialInit(void) {
     DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
 
     // alternate function push-pull
-    GPIO_InitStructure.GPIO_Pin = SERIAL_UART_TX_PIN | SERIAL_UART_RTS_PIN;
+    GPIO_InitStructure.GPIO_Pin = SERIAL_UART_TX_PIN;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_Init(SERIAL_UART_PORT, &GPIO_InitStructure);
 
     // input floating w/ pull ups
-    GPIO_InitStructure.GPIO_Pin = SERIAL_UART_RX_PIN | SERIAL_UART_CTS_PIN;
+    GPIO_InitStructure.GPIO_Pin = SERIAL_UART_RX_PIN;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
     GPIO_Init(SERIAL_UART_PORT, &GPIO_InitStructure);
 
     // Enable the DMA1_Channel4 global Interrupt
     NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel4_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
