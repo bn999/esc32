@@ -139,7 +139,7 @@ extern int16_t fetStartDetects;
 extern int16_t fetDisarmDetects;
 
 extern volatile uint8_t fetStep;
-extern volatile uint8_t fetNextStep;
+extern volatile int8_t fetNextStep;
 extern volatile uint32_t fetBadDetects;
 extern volatile uint32_t fetGoodDetects;
 extern volatile uint32_t fetTotalBadDetects;
@@ -149,6 +149,7 @@ extern int32_t fetPeriod;
 extern volatile uint32_t fetCommutationMicros;
 extern int8_t fetBrakingEnabled;
 extern int8_t fetBraking;
+extern int8_t fetStepDir;
 extern float servoAngle;
 
 extern void fetInit(void);

@@ -22,6 +22,7 @@
 #include "adc.h"
 #include "run.h"
 #include "serial.h"
+#include "can.h"
 #include "stm32f10x_flash.h"
 #include "stm32f10x_rcc.h"
 #include <string.h>
@@ -77,7 +78,9 @@ const char *configParameterStrings[] = {
     "SERVO_P",
     "SERVO_D",
     "SERVO_MAX_RATE",
-    "SERVO_SCALE"
+    "SERVO_SCALE",
+    "ESC_ID",
+    "DIRECTION"
 };
 
 const char *configFormatStrings[] = {
@@ -128,7 +131,9 @@ const char *configFormatStrings[] = {
     "%.3f",	    // SERVO_P
     "%.3f",	    // SERVO_D
     "%.1f deg/s",   // SERVO_MAX_RATE
-    "%.1f deg"	    // SERVO_SCALE
+    "%.1f deg",	    // SERVO_SCALE
+    "%.0f",	    // ESC_ID
+    "%.0f"	    // DIRECTION
 };
 
 void configInit(void) {
@@ -153,6 +158,7 @@ void configRecalcConst(void) {
     runSetConstants();
     pwmSetConstants();
     serialSetConstants();
+    canSetConstants();
 }
 
 int configSetParamByID(int i, float value) {
@@ -253,6 +259,8 @@ void configLoadDefault(void) {
     p[SERVO_D] = DEFAULT_SERVO_D;
     p[SERVO_MAX_RATE] = DEFAULT_SERVO_MAX_RATE;
     p[SERVO_SCALE] = DEFAULT_SERVO_SCALE;
+    p[ESC_ID] = DEFAULT_ESC_ID;
+    p[DIRECTION] = DEFAULT_DIRECTION;
 
     configRecalcConst();
 }

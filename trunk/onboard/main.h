@@ -19,7 +19,7 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-#define VERSION			"1.5.0"
+#define VERSION			"2.0.0"
 
 #include "digital.h"
 
@@ -48,7 +48,8 @@ enum escInputModes {
     ESC_INPUT_UART,
     ESC_INPUT_I2C,
     ESC_INPUT_CAN,
-    ESC_INPUT_OW
+    ESC_INPUT_OW,
+    ESC_INPUT_MAX
 };
 
 enum escDisarmReasons {
@@ -58,7 +59,8 @@ enum escDisarmReasons {
     REASON_PWM_TIMEOUT,
     REASON_LOW_VOLTAGE,
     REASON_CLI,
-    REASON_BINARY
+    REASON_BINARY,
+    REASON_CAN
 };
 
 extern digitalPin *errorLed, *statusLed, *tp;

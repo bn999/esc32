@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright © 2011, 2012  Bill Nesbitt
+    Copyright © 2011, 2012, 2013  Bill Nesbitt
 */
 
 #include "main.h"
@@ -26,7 +26,9 @@
 #include "adc.h"
 #include "run.h"
 #include "cli.h"
+#include "binary.h"
 #include "ow.h"
+#include "can.h"
 
 digitalPin *errorLed, *statusLed;
 #ifdef ESC_DEBUG
@@ -53,6 +55,7 @@ void main(void) {
     adcInit();
     fetInit();
     serialInit();
+    canInit();
     runInit();
     cliInit();
     owInit();
@@ -76,10 +79,12 @@ void main(void) {
 
     // self calibrating idle timer loop
     {
-        volatile unsigned long cycles;
-        volatile unsigned int *DWT_CYCCNT = (int *)0xE0001004;
-        volatile unsigned int *DWT_CONTROL = (int *)0xE0001000;
-        volatile unsigned int *SCB_DEMCR = (int *)0xE000EDFC;
+	uint32_t lastRunCount;
+	uint32_t thisCycles, lastCycles;
+        volatile uint32_t cycles;
+        volatile uint32_t *DWT_CYCCNT = (uint32_t *)0xE0001004;
+        volatile uint32_t *DWT_CONTROL = (uint32_t *)0xE0001000;
+        volatile uint32_t *SCB_DEMCR = (uint32_t *)0xE000EDFC;
 
         *SCB_DEMCR = *SCB_DEMCR | 0x01000000;
         *DWT_CONTROL = *DWT_CONTROL | 1;	// enable the counter
@@ -88,10 +93,17 @@ void main(void) {
         while (1) {
             idleCounter++;
 
-	    NOPS_4;
+	    if (runCount != lastRunCount && !(runCount % (RUN_FREQ / 1000))) {
+		if (commandMode == CLI_MODE)
+		    cliCheck();
+		else
+		    binaryCheck();
+		lastRunCount = runCount;
+	    }
 
-            cycles = *DWT_CYCCNT;
-            *DWT_CYCCNT = 0;		    // reset the counter
+            thisCycles = *DWT_CYCCNT;
+	    cycles = thisCycles - lastCycles;
+	    lastCycles = thisCycles;
 
             // record shortest number of instructions for loop
 	    totalCycles += cycles;

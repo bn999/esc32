@@ -21,7 +21,7 @@
 
 #include "misc.h"
 
-#define RUN_PERIOD		1000		    // 1ms
+#define RUN_FREQ		2000		    // Hz
 #define RUN_ARM_COUNT		20		    // number of valid PWM signals seen before arming
 #define RUN_MIN_MAX_CURRENT	0.0		    // Amps
 #define RUN_MAX_MAX_CURRENT	75.0		    // Amps
@@ -42,7 +42,7 @@ enum runModes {
     NUM_RUN_MODES
 };
 
-extern uint32_t runMilis;
+extern volatile uint32_t runCount;
 extern float idlePercent;
 extern float avgAmps, maxAmps;
 extern float avgVolts;
@@ -51,6 +51,7 @@ extern float targetRpm;
 extern float runRPMFactor;
 extern uint8_t disarmReason;
 extern uint8_t commandMode;
+extern uint8_t escId;
 volatile extern uint8_t runMode;
 
 extern void runInit(void);
@@ -64,5 +65,6 @@ extern void runRpmPIDReset(void);
 extern void runSetConstants(void);
 extern uint16_t runIWDGInit(int ms);
 extern void runFeedIWDG(void);
+extern void runSetpoint(uint16_t val);
 
 #endif
