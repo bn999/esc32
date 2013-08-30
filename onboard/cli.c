@@ -513,9 +513,22 @@ int cliCommandComp(const void *c1, const void *c2) {
 }
 
 cliCommand_t *cliCommandGet(char *name) {
-    cliCommand_t target = {name, NULL};
+    cliCommand_t target = {name, NULL, NULL};
 
     return bsearch(&target, cliCommandTable, CLI_N_CMDS, sizeof cliCommandTable[0], cliCommandComp);
+}
+
+char *cliTabComplete(char *name, int len) {
+    int i;
+
+    for (i = 0; i < CLI_N_CMDS; i++)
+	if (!strncasecmp(name, cliCommandTable[i].name, len))
+	    if (i+1 < CLI_N_CMDS && !strncasecmp(name, cliCommandTable[i+1].name, len))
+		return 0;
+	    else
+		return cliCommandTable[i].name;
+
+    return 0;
 }
 
 void cliPrompt(void) {
@@ -553,7 +566,7 @@ void cliCheck(void) {
 	    if (cliBufIndex > 1) {
 		serialPrint("\r\n");
 		serialPrint(cliClearEOS);
-		cliBuf[cliBufIndex] = 0;
+		cliBuf[cliBufIndex-1] = 0;
 
 		cmd = cliCommandGet(cliBuf);
 
@@ -569,6 +582,21 @@ void cliCheck(void) {
 	    }
 
 	    cliPrompt();
+	}
+	// tab completion
+	else if (c == CLI_TAB) {
+	    char *ret;
+
+	    cliBuf[--cliBufIndex] = 0;
+	    ret = cliTabComplete(cliBuf, cliBufIndex);
+	    if (ret) {
+		cliBufIndex = strlen(ret);
+		memcpy(cliBuf, ret, cliBufIndex);
+		cliBuf[cliBufIndex++] = ' ';
+		serialPrint("\r> ");
+		serialPrint(cliBuf);
+		serialPrint(cliClearEOL);
+	    }
 	}
 	// interrupt
 	else if (c == CLI_INTR) {
