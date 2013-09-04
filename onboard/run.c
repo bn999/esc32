@@ -139,15 +139,17 @@ void runArm(void) {
 }
 
 void runStart(void) {
-   // reset integral bevore new motor startup
-   runRpmPIDReset();
+    if (state == ESC_STATE_STOPPED) {
+       // reset integral before new motor startup
+       runRpmPIDReset();
 
-    if ((p[START_ALIGN_TIME] == 0) && (p[START_STEPS_NUM] == 0)) {
-	state = ESC_STATE_STARTING;
-	fetStartCommutation(0);
-    }
-    else {
-	motorStartSeqInit();
+	if ((p[START_ALIGN_TIME] == 0) && (p[START_STEPS_NUM] == 0)) {
+	    state = ESC_STATE_STARTING;
+	    fetStartCommutation(0);
+	}
+	else {
+	    motorStartSeqInit();
+	}
     }
 }
 
@@ -171,11 +173,20 @@ uint8_t runDuty(float duty) {
 
 // 0 => 2^16
 void runSetpoint(uint16_t val) {
-    uint32_t duty;
+    if (state == ESC_STATE_RUNNING) {
+	if (runMode == OPEN_LOOP) {
+	    fetSetDutyCycle(fetPeriod * val / ((1<<16)-1));
+	}
+	else if (runMode == CLOSED_LOOP_RPM) {
+	    float target = p[PWM_RPM_SCALE] * val * (1.0f / ((1<<16)-1));
 
-    duty = fetPeriod * val / ((1<<16)-1);
-
-    fetSetDutyCycle(duty);
+	    // limit to configured maximum
+	    targetRpm = (target > p[PWM_RPM_SCALE]) ? p[PWM_RPM_SCALE] : target;
+	}
+    }
+    else if (state == ESC_STATE_STOPPED && val > 0) {
+	runStart();
+    }
 }
 
 void runNewInput(uint16_t setpoint) {
@@ -512,7 +523,8 @@ void PVD_IRQHandler(void) {
 void runSetConstants(void) {
     int32_t startupMode = (int)p[STARTUP_MODE];
     float maxCurrent = p[MAX_CURRENT];
-    uint8_t escId = (uint8_t)p[ESC_ID];
+
+    escId = (uint8_t)p[ESC_ID];
 
     if (startupMode < 0 || startupMode >= NUM_RUN_MODES)
 	startupMode = 0;

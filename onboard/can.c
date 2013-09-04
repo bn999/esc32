@@ -451,13 +451,8 @@ static inline void canProcessCmd(canPacket_t *pkt) {
 	break;
 
     case CAN_CMD_START:
-	if (state == ESC_STATE_STOPPED) {
-	    runStart();
-	    canAck(pkt);
-	}
-	else {
-	    canNack(pkt);
-	}
+	runStart();
+	canAck(pkt);
 	break;
 
     case CAN_CMD_STOP:

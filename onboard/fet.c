@@ -668,8 +668,10 @@ void motorStartSeq(int period) {
     // Rotating field with optional acceleration but without commutation.
     else if (startSeqCnt < (p[START_ALIGN_TIME] + p[START_STEPS_NUM])) {
 	// One time if entering "Rotating field"
-	if (startSeqCnt == p[START_ALIGN_TIME])
+	if (startSeqCnt == p[START_ALIGN_TIME]) {
 	    period = p[MAX_PERIOD] * TIMER_MULT;
+	    detectedCrossing = timerMicros;
+	}
 
 	fetSetStep(fetNextStep);
 
@@ -681,7 +683,7 @@ void motorStartSeq(int period) {
 	// Prepare next function call
 	nextPeriod = period - (p[START_STEPS_ACCEL] * TIMER_MULT);
 	if (nextPeriod < p[START_STEPS_PERIOD] * TIMER_MULT)
-		nextPeriod = crossingPeriod;
+	    nextPeriod = crossingPeriod;
 
 	timerSetAlarm2(period, motorStartSeq, nextPeriod);
     }
