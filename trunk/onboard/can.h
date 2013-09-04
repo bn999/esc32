@@ -144,10 +144,10 @@ typedef struct {
 } __attribute__((packed)) canGroup12_t;
 
 typedef struct {
-    unsigned int value1 : 16;
-    unsigned int value2 : 16;
-    unsigned int value3 : 16;
-    unsigned int value4 : 16;
+    uint16_t value1;
+    uint16_t value2;
+    uint16_t value3;
+    uint16_t value4;
 } __attribute__((packed)) canGroup16_t;
 
 typedef struct {
