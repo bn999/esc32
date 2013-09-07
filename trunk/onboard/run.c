@@ -173,14 +173,26 @@ uint8_t runDuty(float duty) {
 
 // 0 => 2^16
 void runSetpoint(uint16_t val) {
+    float target;
+
     if (state == ESC_STATE_RUNNING) {
 	if (runMode == OPEN_LOOP) {
 	    fetSetDutyCycle(fetPeriod * val / ((1<<16)-1));
 	}
 	else if (runMode == CLOSED_LOOP_RPM) {
-	    float target = p[PWM_RPM_SCALE] * val * (1.0f / ((1<<16)-1));
+	    // target RPM
+	    target = p[PWM_RPM_SCALE] * val * (1.0f / ((1<<16)-1));
 
 	    // limit to configured maximum
+	    targetRpm = (target > p[PWM_RPM_SCALE]) ? p[PWM_RPM_SCALE] : target;
+	}
+	else if (runMode == CLOSED_LOOP_THRUST) {
+	    // target thrust
+	    target = maxThrust * val * (1.0f / ((1<<16)-1));
+
+	    // calc target RPM for requested thrust
+	    target = ((sqrtf(p[THR1TERM] * p[THR1TERM] + 4.0f * p[THR2TERM] * target) - p[THR1TERM] ) / ( 2.0f * p[THR2TERM] ));
+
 	    targetRpm = (target > p[PWM_RPM_SCALE]) ? p[PWM_RPM_SCALE] : target;
 	}
     }
@@ -481,6 +493,8 @@ void SysTick_Handler(void) {
     // reload the hardware watchdog
     runFeedIWDG();
 
+    canProcess();
+
     avgVolts = adcAvgVolts * ADC_TO_VOLTS;
     avgAmps = (adcAvgAmps - adcAmpsOffset) * adcToAmps;
 
@@ -500,8 +514,6 @@ void SysTick_Handler(void) {
 	oldIdleCounter = idleCounter;
 	totalCycles = 0;
     }
-
-    canProcess();
 
     runCount++;
 }
