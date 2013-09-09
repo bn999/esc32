@@ -292,6 +292,8 @@ static inline void canProcessGet(canPacket_t *pkt) {
 	while (*p2)
 	    *p1++ = *p2++;
 
+	*p1 = 0;
+
 	canReply(pkt, 8);
 	break;
 
