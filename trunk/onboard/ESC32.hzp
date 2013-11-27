@@ -33,6 +33,10 @@
       <file file_name="ow.h"/>
       <file file_name="can.h"/>
       <file file_name="can.c"/>
+      <folder Name="xxHash" file_name="">
+        <file file_name="xxhash.c"/>
+        <file file_name="xxhash.h"/>
+      </folder>
     </folder>
     <folder Name="System Files">
       <file file_name="$(StudioDir)/source/thumb_crt0.s"/>
