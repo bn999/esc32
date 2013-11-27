@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright Â© 2011, 2012, 2013  Bill Nesbitt
+    Copyright © 2011, 2012, 2013  Bill Nesbitt
 */
 
 #include "main.h"
@@ -23,6 +23,7 @@
 #include "pwm.h"
 #include "fet.h"
 #include "misc.h"
+#include "xxhash.h"
 
 canDataStruct_t canData;
 
@@ -98,7 +99,7 @@ static inline void canSetParam(canPacket_t *pkt) {
 static inline void canSendGetAddr(void) {
     uint8_t d[8];
 
-    *((uint32_t *)&d[0]) = CAN_UUID;
+    *((uint32_t *)&d[0]) = canData.uuid;
 
     d[4] = CAN_TYPE_ESC;
     d[5] = escId;
@@ -128,7 +129,7 @@ static inline void canProcessAddr(canPacket_t *pkt) {
     CAN_FilterInitTypeDef CAN_FilterInitStructure;
 
     // our UUID?
-    if (*((uint32_t *)&pkt->data[0]) == CAN_UUID) {
+    if (*((uint32_t *)&pkt->data[0]) == canData.uuid) {
 	canData.networkId = pkt->tid;
 
 	// set filter such that we only get messages destined for our TID
@@ -668,6 +669,8 @@ void canInit(void) {
 //    CAN_ITConfig(CAN_CAN, CAN_IT_TME, ENABLE);
 //    CAN_ITConfig(CAN_CAN, CAN_IT_FMP0, ENABLE);
 //    CAN_ITConfig(CAN_CAN, CAN_IT_FMP1, ENABLE);
+
+    canData.uuid = XXH32((void *)CAN_UUID, 3*4, 0);
 
     canBusReset();
     canSendGetAddr();

@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright Â© 2011, 2012, 2013  Bill Nesbitt
+    Copyright © 2011, 2012, 2013  Bill Nesbitt
 */
 
 #ifndef _can_h
@@ -26,7 +26,7 @@
 #define CAN_RX_PIN	GPIO_Pin_11
 #define CAN_TX_PIN	GPIO_Pin_12
 
-#define CAN_UUID	*((uint32_t *)(0x1FFFF7E8 + 0))
+#define CAN_UUID	0x1FFFF7E8
 
 // Logical Communications Channel
 // 2 bits [28:27]
@@ -151,6 +151,7 @@ typedef struct {
 } __attribute__((packed)) canGroup16_t;
 
 typedef struct {
+    uint32_t uuid;
     uint32_t mailboxFull;
     uint32_t packetsReceived;
     uint8_t networkId;
