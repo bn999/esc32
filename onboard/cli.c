@@ -198,7 +198,7 @@ void cliFuncConfig(void *cmd, char *cmdLine) {
 }
 
 void cliFuncDisarm(void *cmd, char *cmdLine) {
-    runDisarm(REASON_CLI);
+    runDisarm(REASON_CLI_USER);
     cliFuncChangeInput(ESC_INPUT_UART);
     serialPrint("ESC disarmed\r\n");
 }

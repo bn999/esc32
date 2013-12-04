@@ -290,6 +290,15 @@ static inline void runWatchDog(void) {
 	    if (p > PWM_TIMEOUT)
 		runDisarm(REASON_PWM_TIMEOUT);
 	}
+	// timeout if CAN updates cease
+	else if (inputMode == ESC_INPUT_CAN) {
+	    uint32_t a = canData.validMicros;
+
+	    a = (t >= a) ? (t - a) : (TIMER_MASK - a + t);
+
+	    if (a > CAN_TIMEOUT)
+		runDisarm(REASON_CAN_TIMEOUT);
+	}
 
 	if (state >= ESC_STATE_STARTING && d > ADC_CROSSING_TIMEOUT) {
 	    if (fetDutyCycle > 0) {
