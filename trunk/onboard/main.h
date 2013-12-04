@@ -58,9 +58,10 @@ enum escDisarmReasons {
     REASON_CROSSING_TIMEOUT,
     REASON_PWM_TIMEOUT,
     REASON_LOW_VOLTAGE,
-    REASON_CLI,
-    REASON_BINARY,
-    REASON_CAN
+    REASON_CLI_USER,
+    REASON_BINARY_USER,
+    REASON_CAN_USER,
+    REASON_CAN_TIMEOUT
 };
 
 extern digitalPin *errorLed, *statusLed, *tp;

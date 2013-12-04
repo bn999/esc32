@@ -28,6 +28,8 @@
 
 #define CAN_UUID	0x1FFFF7E8
 
+#define CAN_TIMEOUT	    (200000*TIMER_MULT)	    // 0.2 secs
+
 // Logical Communications Channel
 // 2 bits [28:27]
 #define CAN_LCC_MASK	    ((uint32_t)0x3<<30)
@@ -179,6 +181,7 @@ typedef struct {
 } esc32CanStatus_t;
 
 typedef struct {
+    uint32_t validMicros;
     uint32_t uuid;
     uint32_t mailboxFull;
     uint32_t packetsReceived;

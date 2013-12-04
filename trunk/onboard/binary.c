@@ -161,7 +161,7 @@ void binaryCommandParse(void) {
 	break;
 
     case BINARY_COMMAND_DISARM:
-    	runDisarm(REASON_BINARY);
+    	runDisarm(REASON_BINARY_USER);
 	binaryAck();
 	break;
 
