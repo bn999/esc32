@@ -132,6 +132,8 @@ static inline void canProcessAddr(canPacket_t *pkt) {
     // our UUID?
     if (*((uint32_t *)&pkt->data[0]) == canData.uuid) {
 	canData.networkId = pkt->tid;
+	canData.groupId = ((uint8_t *)pkt->data)[4];
+	canData.subGroupId = ((uint8_t *)pkt->data)[5];
 
 	// set filter such that we only get messages destined for our TID
 	CAN_FilterInitStructure.CAN_FilterNumber = 0;
@@ -156,6 +158,10 @@ static inline void canProcessAddr(canPacket_t *pkt) {
 	CAN_FilterInitStructure.CAN_FilterFIFOAssignment = 0;
 	CAN_FilterInitStructure.CAN_FilterActivation = ENABLE;
 	CAN_FilterInit(&CAN_FilterInitStructure);
+
+	// if we got a ground assignment
+	if (canData.groupId)
+	    canFilterGroup();
     }
 }
 
