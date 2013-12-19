@@ -86,7 +86,7 @@ void pwmInit(void) {
     TIM_ICInitStructure.TIM_ICPolarity = TIM_ICPolarity_Rising;
     TIM_ICInitStructure.TIM_ICSelection = TIM_ICSelection_DirectTI;
     TIM_ICInitStructure.TIM_ICPrescaler = TIM_ICPSC_DIV1;
-    TIM_ICInitStructure.TIM_ICFilter = 0x0;
+    TIM_ICInitStructure.TIM_ICFilter = 0x08;
     TIM_PWMIConfig(PWM_TIM, &TIM_ICInitStructure);
 
     // Select the TIM Input Trigger: TI1FP1
