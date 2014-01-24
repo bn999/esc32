@@ -259,5 +259,33 @@
 				<CL5TERM>+9.456392e-01</CL5TERM>
 			</prop>
 		</motor>
+    <motor model="MN3508-16">
+      <prop model="T-Motor 12x4">
+        <ADVANCE>22</ADVANCE>
+        <SWITCH_FREQ>12</SWITCH_FREQ>
+        <PWM_RPM_SCALE>7000</PWM_RPM_SCALE>
+        <FF1TERM>+4.924490e-08</FF1TERM>
+        <FF2TERM>+1.373310e-03</FF2TERM>
+        <CL1TERM>+2.400780e-01</CL1TERM>
+        <CL2TERM>+1.383540e-03</CL2TERM>
+        <CL3TERM>+6.149200e-02</CL3TERM>
+        <CL4TERM>-4.208620e-05</CL4TERM>
+        <CL5TERM>+6.567950e-01</CL5TERM>
+      </prop>
+     </motor>
+     <motor model="MT2216-11">
+      <prop model="Carbon 10x4.5">
+        <ADVANCE>15</ADVANCE>
+        <MAX_CURRENT>20</MAX_CURRENT>
+        <PWM_RPM_SCALE>7200</PWM_RPM_SCALE>
+        <FF1TERM>+5.250750e-08</FF1TERM>
+        <FF2TERM>+1.124310e-03</FF2TERM>
+        <CL1TERM>+1.049690e-01</CL1TERM>
+        <CL2TERM>+1.158580e-03</CL2TERM>
+        <CL3TERM>-1.348010e-02</CL3TERM>
+        <CL4TERM>-5.932490e-05</CL4TERM>
+        <CL5TERM>+1.367210e-00</CL5TERM>
+      </prop>
+     </motor>
 	</brand>
 </esc32>
