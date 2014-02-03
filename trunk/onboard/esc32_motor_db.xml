@@ -287,5 +287,60 @@
         <CL5TERM>+1.367210e-00</CL5TERM>
       </prop>
      </motor>
+     <motor model="MT2216-12">
+      <prop model="Graupner 10x5">
+        <ADVANCE>15</ADVANCE>
+        <MAX_CURRENT>14</MAX_CURRENT>
+        <PWM_RPM_SCALE>9200</PWM_RPM_SCALE>
+        <FF1TERM>+3.295050e-08</FF1TERM>
+        <FF2TERM>+1.273700e-03</FF2TERM>
+        <CL1TERM>-2.297530e-01</CL1TERM>
+        <CL2TERM>+1.258860e-03</CL2TERM>
+        <CL3TERM>-1.458170e-02</CL3TERM>
+        <CL4TERM>-5.223090e-05</CL4TERM>
+        <CL5TERM>+1.782100e+00</CL5TERM>
+      </prop>
+      <prop model="Graupner 11x5">
+        <ADVANCE>15</ADVANCE>
+        <MAX_CURRENT>13</MAX_CURRENT>
+        <PWM_RPM_SCALE>8500</PWM_RPM_SCALE>
+        <FF1TERM>+4.700510e-08</FF1TERM>
+        <FF2TERM>+1.294790e-03</FF2TERM>
+        <CL1TERM>-1.230870e-01</CL1TERM>
+        <CL2TERM>+1.209810e-03</CL2TERM>
+        <CL3TERM>-1.980290e-02</CL3TERM>
+        <CL4TERM>-3.493110e-05</CL4TERM>
+        <CL5TERM>+1.714650e+00</CL5TERM>
+      </prop>
+     </motor>
+	</brand>
+  <brand name="KEDA">
+		<motor model="kda20-50s">
+			<prop model="8045sf">
+				<MAX_CURRENT>7</MAX_CURRENT>
+        <ADVANCE>12</ADVANCE>
+        <PWM_RPM_SCALE>7200</PWM_RPM_SCALE>
+				<FF1TERM>+8.082689e-08</FF1TERM>
+				<FF2TERM>+1.005266e-03</FF2TERM>
+				<CL1TERM>+5.575571e-01</CL1TERM>
+				<CL2TERM>+8.891050e-04</CL2TERM>
+				<CL3TERM>+8.414046e-03</CL3TERM>
+				<CL4TERM>+6.982315e-05</CL4TERM>
+				<CL5TERM>+1.649058e+00</CL5TERM>
+			</prop>
+		</motor>
+		<motor model="kda20-28m">
+			<prop model="8045sf">
+				<MAX_CURRENT>12</MAX_CURRENT>
+				<PWM_RPM_SCALE>8300</PWM_RPM_SCALE>
+				<FF1TERM>+5.692156e-08</FF1TERM>
+				<FF2TERM>+9.534656e-04</FF2TERM>
+				<CL1TERM>+5.448056e-01</CL1TERM>
+				<CL2TERM>+8.343962e-04</CL2TERM>
+				<CL3TERM>+6.809063e-02</CL3TERM>
+				<CL4TERM>+4.156192e-05</CL4TERM>
+				<CL5TERM>+1.031123e+00</CL5TERM>
+			</prop>
+		</motor>
 	</brand>
 </esc32>
