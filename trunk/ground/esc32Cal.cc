@@ -1,3 +1,21 @@
+/*
+    This file is part of AutoQuad ESC32.
+
+    AutoQuad ESC32 is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    AutoQuad ESC32 is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
+
+    Copyright © 2011-2014  Bill Nesbitt
+*/
+
 #include "esc32.h"
 #include "serial.h"
 #include "plplot/plplot.h"
@@ -38,6 +56,7 @@ int runR2V, runCL;
 FILE* telemOutFile;
 volatile unsigned char lastAck;
 volatile unsigned short lastSeqId = -1;
+volatile short paramId;
 pthread_t threadIn;
 pthread_mutex_t threadMutex = PTHREAD_MUTEX_INITIALIZER;
 serialStruct_t *s;
@@ -112,6 +131,7 @@ void *esc32Read(void *ipt) {
 	unsigned short seqId;
         unsigned char c;
 	int rows, cols;
+	int n;
         int i, j;
 
         while (1) {
@@ -129,9 +149,12 @@ void *esc32Read(void *ipt) {
 		checkInA = checkInB = 0;
 
 		if (c == 'C') {
-			c = esc32GetChar(s);	// count
+			n = esc32GetChar(s);	// count
 			c = esc32GetChar(s);	// command
 			seqId = esc32GetShort(s);
+
+			if (n > 3)
+				paramId = esc32GetShort(s);
 
 			if (serialRead(s) != checkInA)
 				goto thread_read_start;
@@ -152,6 +175,9 @@ void *esc32Read(void *ipt) {
 #ifdef ESC32_DEBUG
 				printf("Nack [%d]\n", seqId);
 #endif
+			}
+			else if (c == BINARY_COMMAND_GET_PARAM_ID) {
+				lastSeqId = seqId;
 			}
 			else {
 				printf("Unkown command [%d]\n", c);
@@ -312,6 +338,44 @@ int esc32SendReliably(unsigned char command, float param1, float param2, int n) 
 		ret = lastAck;
 
 	return ret;
+}
+
+int16_t esc32GetParamId(const char *name) {
+	unsigned short seqId;
+	int id;
+	int i, j, k;
+
+	j = 0;
+	do {
+		seqId = commandSeqId++;
+
+		serialPrint(s, "Aq");
+		checkOutA = checkOutB = 0;
+
+		esc32SendChar(1 + 16 + 2);
+		esc32SendChar(BINARY_COMMAND_GET_PARAM_ID);
+		esc32SendShort(seqId);
+		for (i = 0; i < 16; i++)
+			esc32SendChar(name[i]);
+
+		serialWriteChar(s, checkOutA);
+		serialWriteChar(s, checkOutB);
+
+		k = 0;
+		do {
+			usleep(1000);
+			k++;
+		} while (lastSeqId != seqId && k < 500);
+
+		j++;
+	} while (lastSeqId != seqId && j < 5);
+
+	if (lastSeqId == seqId)
+		id = paramId;
+	else
+		id = -1;
+
+	return id;
 }
 
 void rpmToVoltageGraph(MatrixXd &data, MatrixXd &b, int n) {

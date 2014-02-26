@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright Â© 2011, 2012  Bill Nesbitt
+    Copyright © 2011-2014  Bill Nesbitt
 */
 
 #ifndef _OW_H
@@ -35,6 +35,7 @@
 #define OW_CONFIG_DEFAULT   0x08
 #define OW_SET_MODE	    0x09
 #define OW_GET_MODE	    0x0A
+#define OW_GET_PARAM_ID     0x0B
 
 #define OW_UID_ADDRESS	    0x1FFFF7E8
 
@@ -47,7 +48,7 @@ enum {
 };
 
 extern uint8_t owROMCode[8];
-extern uint8_t owBuf[16];
+extern uint8_t owBuf[32];
 extern uint8_t *owBufPointer;
 extern uint8_t owState;
 extern uint8_t owLastCommand;

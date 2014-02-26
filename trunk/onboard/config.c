@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright Â© 2011, 2012, 2013  Bill Nesbitt
+    Copyright © 2011-2014  Bill Nesbitt
 */
 
 #include "config.h"
@@ -193,7 +193,7 @@ int configGetId(char *param) {
     int i;
 
     for (i = 0; i < CONFIG_NUM_PARAMS; i++)
-	if (!strncasecmp(configParameterStrings[i], param, strlen(configParameterStrings[i])))
+	if (!strncasecmp(configParameterStrings[i], param, 16))
 	    return i;
 
     return -1;
