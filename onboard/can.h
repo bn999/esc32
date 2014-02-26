@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright © 2011, 2012, 2013  Bill Nesbitt
+    Copyright © 2011-2014  Bill Nesbitt
 */
 
 #ifndef _can_h
@@ -117,9 +117,12 @@ enum {
     CAN_DATA_INPUT_MODE,
     CAN_DATA_RUN_MODE,
     CAN_DATA_STATE,
-    CAN_DATA_PARAM,
+    CAN_DATA_PARAM_ID,
     CAN_DATA_TELEM,
-    CAN_DATA_VERSION
+    CAN_DATA_VERSION,
+    CAN_DATA_VALUE,
+    CAN_DATA_PARAM_NAME1,
+    CAN_DATA_PARAM_NAME2
 };
 
 // telemetry values
@@ -185,6 +188,7 @@ typedef struct {
     uint32_t uuid;
     uint32_t mailboxFull;
     uint32_t packetsReceived;
+    uint8_t paramName[16];
     uint16_t telemRate;
     uint8_t telemValues[CAN_TELEM_NUM];
     uint8_t networkId;

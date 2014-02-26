@@ -1,19 +1,19 @@
 /*
-    This file is part of AutoQuad.
+    This file is part of AutoQuad ESC32.
 
-    AutoQuad is free software: you can redistribute it and/or modify
+    AutoQuad ESC32 is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    AutoQuad is distributed in the hope that it will be useful,
+    AutoQuad ESC32 is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
     You should have received a copy of the GNU General Public License
-    along with AutoQuad.  If not, see <http://www.gnu.org/licenses/>.
+    along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright © 2011, 2012, 2013  Bill Nesbitt
+    Copyright © 2011-2014  Bill Nesbitt
 */
 
 #define DEFAULT_PORT		"/dev/cu.usbserial-FTELPQ1S"
@@ -35,6 +35,7 @@ enum binaryCommands {
     BINARY_COMMAND_TELEM_RATE,
     BINARY_COMMAND_VERSION,
     BINARY_COMMAND_TELEM_VALUE,
+    BINARY_COMMAND_GET_PARAM_ID,
     BINARY_COMMAND_ACK = 250,
     BINARY_COMMAND_NACK
 };
@@ -108,5 +109,7 @@ enum configParameters {
     SERVO_D,
     SERVO_MAX_RATE,
     SERVO_SCALE,
+    ESC_ID,
+    DIRECTION,
     CONFIG_NUM_PARAMS
 };
