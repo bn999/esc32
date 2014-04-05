@@ -46,6 +46,8 @@ using namespace Eigen;
 
 unsigned char checkInA, checkInB;
 unsigned char checkOutA, checkOutB;
+char sendBuf[128];
+unsigned char sendBufPtr;
 volatile float telemValueAvgs[BINARY_VALUE_NUM];
 volatile float telemValueMaxs[BINARY_VALUE_NUM];
 volatile float telemData[256][BINARY_VALUE_NUM];
@@ -64,6 +66,10 @@ unsigned short commandSeqId = 1;
 
 char port[256];
 unsigned int baud;
+
+void esc32Send(void) {
+	serialWrite(s, sendBuf, sendBufPtr);
+}
 
 void esc32OutChecksum(unsigned char c) {
 	checkOutA += c;
@@ -85,7 +91,7 @@ unsigned char esc32GetChar(serialStruct_t *s) {
 }
 
 void esc32SendChar(unsigned char c) {
-	serialWriteChar(s, c);
+	sendBuf[sendBufPtr++] = c;
 	esc32OutChecksum(c);
 }
 
@@ -232,21 +238,27 @@ void *esc32Read(void *ipt) {
 }
 
 unsigned short esc32SendCommand(unsigned char command, float param1, float param2, int n) {
-	serialPrint(s, "Aq");
 	checkOutA = checkOutB = 0;
+	sendBufPtr = 0;
 
 #ifdef ESC32_DEBUG
-	printf("Send %d [%d]\n", command, commandSeqId);
+        printf("Send %d [%d] - ", command, commandSeqId);
 #endif
-	esc32SendChar(1 + 2 + n*sizeof(float));
-	esc32SendChar(command);
-	esc32SendShort(commandSeqId++);
-	if (n > 0)
-		esc32SendFloat(param1);
-	if (n > 1)
-		esc32SendFloat(param2);
-	serialWriteChar(s, checkOutA);
-	serialWriteChar(s, checkOutB);
+        sendBuf[sendBufPtr++] = 'A';
+        sendBuf[sendBufPtr++] = 'q';
+        esc32SendChar(1 + 2 + n*sizeof(float));
+        esc32SendChar(command);
+        esc32SendShort(commandSeqId++);
+        if (n > 0)
+                esc32SendFloat(param1);
+        if (n > 1)
+                esc32SendFloat(param2);
+        sendBuf[sendBufPtr++] = checkOutA;
+        sendBuf[sendBufPtr++] = checkOutB;
+        esc32Send();
+#ifdef ESC32_DEBUG
+        printf("%d bytes\n", sendBufPtr);
+#endif
 
 	return (commandSeqId - 1);
 }
@@ -349,17 +361,20 @@ int16_t esc32GetParamId(const char *name) {
 	do {
 		seqId = commandSeqId++;
 
-		serialPrint(s, "Aq");
 		checkOutA = checkOutB = 0;
+		sendBufPtr = 0;
 
+		sendBuf[sendBufPtr++] = 'A';
+		sendBuf[sendBufPtr++] = 'q';
 		esc32SendChar(1 + 16 + 2);
 		esc32SendChar(BINARY_COMMAND_GET_PARAM_ID);
 		esc32SendShort(seqId);
 		for (i = 0; i < 16; i++)
 			esc32SendChar(name[i]);
 
-		serialWriteChar(s, checkOutA);
-		serialWriteChar(s, checkOutB);
+		sendBuf[sendBufPtr++] = checkOutA;
+		sendBuf[sendBufPtr++] = checkOutB;
+		esc32Send();
 
 		k = 0;
 		do {
@@ -376,6 +391,18 @@ int16_t esc32GetParamId(const char *name) {
 		id = -1;
 
 	return id;
+}
+
+short esc32SetParamByName(const char *name, float value) {
+	short int paramId;
+
+	paramId = esc32GetParamId(name);
+
+	if (paramId < 0)
+		return -1;
+
+	
+	return esc32SendReliably(BINARY_COMMAND_SET, paramId, value, 2);
 }
 
 void rpmToVoltageGraph(MatrixXd &data, MatrixXd &b, int n) {
@@ -680,7 +707,9 @@ int main(int argc, char **argv) {
         }
 
 	serialPrint(s, "\n");
+	usleep(100000);
 	serialPrint(s, "binary\n");
+	usleep(100000);
 
 	if (!esc32SendReliably(BINARY_COMMAND_NOP, 0.0, 0.0, 0)) {
 		fprintf(stderr, "Cannot communicate with ESC, aborting...\n");
@@ -693,7 +722,9 @@ int main(int argc, char **argv) {
 	esc32SendReliably(BINARY_COMMAND_TELEM_VALUE, 0.0, BINARY_VALUE_RPM, 2);
 	esc32SendReliably(BINARY_COMMAND_TELEM_VALUE, 1.0, BINARY_VALUE_VOLTS_MOTOR, 2);
 	esc32SendReliably(BINARY_COMMAND_TELEM_VALUE, 2.0, BINARY_VALUE_AMPS, 2);
-	esc32SendReliably(BINARY_COMMAND_SET, MAX_CURRENT, 0.0, 2);
+//	esc32SendReliably(BINARY_COMMAND_SET, MAX_CURRENT, 0.0, 2);
+	esc32SetParamByName("MAX_CURRENT", 0.0);
+
 
 	// disarm motor if interrupted
 	signal(SIGINT, signal_callback_handler);
