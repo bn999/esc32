@@ -480,7 +480,7 @@ void canSendStatus(void) {
     stat.vin = avgVolts * 100;
     stat.amps = avgAmps * 100;
     stat.rpm = rpm;
-    stat.duty = fetActualDutyCycle * 255 /fetPeriod;
+    stat.duty = fetActualDutyCycle * 255 / fetPeriod / 100;
     stat.errors = fetTotalBadDetects;
     stat.errCode = disarmReason;
 
