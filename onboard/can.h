@@ -81,7 +81,7 @@ enum {
     CAN_TYPE_ESC = 1,
     CAN_TYPE_SERVO,
     CAN_TYPE_SENSOR,
-    CAN_TYPE_LED,
+    CAN_TYPE_SWITCH,
     CAN_TYPE_OSD,
     CAN_TYPE_UART,
     CAN_TYPE_HUB,
@@ -106,7 +106,10 @@ enum {
     CAN_CMD_BEEP,
     CAN_CMD_POS,
     CAN_CMD_USER_DEFINED,
-    CAN_CMD_RESET
+    CAN_CMD_RESET,
+    CAN_CMD_STREAM,
+    CAN_CMD_ON,
+    CAN_CMD_OFF
 };
 
 // data types
