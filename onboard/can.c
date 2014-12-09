@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright © 2011-2014  Bill Nesbitt
+    Copyright ï¿½ 2011-2014  Bill Nesbitt
 */
 
 #include "main.h"
@@ -611,6 +611,7 @@ static inline void canProcessCmd(canPacket_t *pkt) {
 	else {
 	    canNack(pkt);
 	}
+	break;
 
     case CAN_CMD_USER_DEFINED:
 	// TODO
