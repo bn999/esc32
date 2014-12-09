@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with AutoQuad ESC32.  If not, see <http://www.gnu.org/licenses/>.
 
-    Copyright © 2011-2014  Bill Nesbitt
+    Copyright ï¿½ 2011-2014  Bill Nesbitt
 */
 
 #ifndef _can_h
@@ -184,7 +184,7 @@ typedef struct {
     unsigned int duty :	    8;	// x (255/100)
     unsigned int errors :   9;
     unsigned int errCode :  3;
-} esc32CanStatus_t;
+} __attribute__((packed)) esc32CanStatus_t;
 
 typedef struct {
     uint32_t validMicros;
